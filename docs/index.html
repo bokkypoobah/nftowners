@@ -949,7 +949,7 @@
               db0.version(this.db.version).stores(this.db.schemaDefinition);
 
               // TODO
-              if (action == "importFromEtherscan") {
+              if (false && action == "importFromEtherscan") {
                 const address = parameters;
                 const apikey = this.settings.etherscanAPIKey || "YourApiKeyToken";
                 let importUrl = "https://api.etherscan.io/api?module=account&action=txlist&address=" + address + "&startblock=0&endblock=" + blockNumber + "&page=1&offset=10000&sort=asc&apikey=" + apikey;
@@ -976,7 +976,7 @@
                 }
               }
 
-              if (action == "importHashes") {
+              if (false && action == "importHashes") {
                 const hashesToImport = this.hashesToImport == null ? [] : this.hashesToImport.split(/[, \t\n]+/).filter(name => (name.length == 66 && name.substring(0, 2) == '0x'));
                 console.log(JSON.stringify(hashesToImport, null, 2));
                 let importOrder = 0;
@@ -1005,7 +1005,7 @@
                 });
               }
 
-              if (action == "connect" || action == "addAddresses") {
+              if (false && (action == "connect" || action == "addAddresses")) {
                 const addAddresses = (action == "connect") ? [this.coinbase] : (this.addressesToAdd == null ? [] : this.addressesToAdd.split(/[, \t\n]+/).filter(name => (name.length == 42 && name.substring(0, 2) == '0x')));
                 for (let address of addAddresses) {
                   try {
@@ -1040,7 +1040,7 @@
                 });
               }
 
-              if (action == "retrieveData") {
+              if (false && action == "retrieveData") {
                 console.log("Retrieving data");
                 const txHashesToProcess = [];
                 for (const [txHash, txItem] of Object.entries(this.txHashes)) {
@@ -1100,7 +1100,7 @@
                 this.sync.section = null;
               }
 
-              if (action == "addAddresses" || action == "retrieveData" || action == "connect") {
+              if (false && (action == "addAddresses" || action == "retrieveData" || action == "connect")) {
                 const ensMap = {};
                 // TODO
                 // ensMap[this.coinbase] = this.coinbase;
@@ -1175,7 +1175,7 @@
                 });
               }
 
-              if (action == "compute") {
+              if (false && action == "compute") {
                 console.log("compute: " + JSON.stringify(Object.keys(this.selectedTxs)));
                 for (let txHash of Object.keys(this.selectedTxs)) {
                   const txItem = this.txHashes[txHash];
@@ -1184,7 +1184,7 @@
                 }
               }
 
-              if (action == "computeAddresses") {
+              if (false && action == "computeAddresses") {
                 console.log("computeAddresses");
                 this.sync.completed = 0;
                 const exclude = []; // ["0x5c40eF6f527f4FbA68368774E6130cE6515123f2", "0x755cdba6AE4F479f7164792B318b2a06c759833B", "0x5F0281910Af44bFb5fC7e86A404d0304B0e042F1", "0xe36f573DbeCDdBbcb72dD6270aF7978963F4C2D3", "0x60E112d4E585bba817Dc513bF9a03cd9b5A46Fc9", "0xcAFFa1d66eaE19887319ab9AECA5bd9aEB9D2DDE"];
