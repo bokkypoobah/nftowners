@@ -66,7 +66,7 @@
             </b-card-text>
           </b-card>
 
-          <b-card class="mx-1 mt-1 mb-1" body-class="m-1 p-0" header-class="m-0 p-2">
+          <b-card v-if="false" class="mx-1 mt-1 mb-1" body-class="m-1 p-0" header-class="m-0 p-2">
             <template #header>
               Addresses
             </template>
@@ -277,7 +277,7 @@
             </b-card-body>
           </b-card> -->
 
-          <b-card-body class="m-0 px-1 py-0 pt-1">
+          <b-card-body v-if="false" class="m-0 px-1 py-0 pt-1">
             <div class="d-flex flex-wrap m-0 p-0">
               <div class="mt-0 pr-1">
                 <b-form-input type="text" size="sm" v-model.trim="settings.txs.searchTxs" @change="settingsUpdated" debounce="600" v-b-popover.hover.top="'Filter by partial tx hash, address, name'" placeholder="🔍 {txHash|addr|name} "></b-form-input>
@@ -1338,88 +1338,88 @@
           if ('coinbase' in localStorage) {
             this.coinbase = localStorage.coinbase;
           }
-          if ('selectedAddresses' in localStorage) {
-            this.selectedAddresses = JSON.parse(localStorage.selectedAddresses);
-          }
-          if ('selectedTxs' in localStorage) {
-            this.selectedTxs = JSON.parse(localStorage.selectedTxs);
-          }
-          if ('settings' in localStorage) {
-            // console.log("mounted - before - this.settings: " + JSON.stringify(this.settings, null, 2));
-            // console.log("mounted - before - localStorage.settings: " + localStorage.settings);
-            this.settings = { ...this.settings, ...JSON.parse(localStorage.settings) };
-
-            if (this.settings.txs.currentPage > 1) {
-              this.settings.txs.currentPage = 1;
-            }
-            if (this.settings.addressTable.currentPage > 1) {
-              this.settings.addressTable.currentPage = 1;
-            }
-            if (!('addressTypeFilter' in this.settings.addressTable)) {
-              console.log("Adding addressTypeFilter");
-              this.settings.addressTable.addressTypeFilter = null;
-            }
-            if (!('searchAddresses' in this.settings.addressTable)) {
-              console.log("Adding settings.addressTable.searchAddresses");
-              this.settings.addressTable.searchAddresses = null;
-            }
-            if (!('addressMineFilter' in this.settings.addressTable)) {
-              console.log("Adding addressMineFilter");
-              this.settings.addressTable.addressMineFilter = null;
-            }
-            if (!('showDetails' in this.settings.addressTable)) {
-              console.log("Adding addressTable.showDetails");
-              this.settings.addressTable.showDetails = {};
-            }
-            if (!('searchTxs' in this.settings.txs)) {
-              console.log("Adding settings.txs.searchTxs");
-              this.settings.txs.searchTxs = null;
-            }
-            if (!('showDetails' in this.settings.txs)) {
-              console.log("Adding txs.showDetails");
-              this.settings.txs.showDetails = {};
-            }
-            if ('showAddresses' in this.settings) {
-              console.log("Removing showAddresses");
-              delete this.settings['showAddresses'];
-            }
-            if (!('etherscanAPIKey' in this.settings)) {
-              console.log("Adding etherscanAPIKey");
-              this.settings.etherscanAPIKey = null;
-            }
-            console.log("mounted - after: " + JSON.stringify(this.settings, null, 2));
-          }
-          (async() => {
-            const db0 = new Dexie(this.db.name);
-            db0.version(this.db.version).stores(this.db.schemaDefinition);
-            const txHashes = await db0.cache.where("objectName").equals('txHashes').toArray();
-            if (txHashes.length == 1) {
-              this.txHashes = txHashes[0].object;
-            }
-            const ensMap = await db0.cache.where("objectName").equals('ensMap').toArray();
-            if (ensMap.length == 1) {
-              this.ensMap = ensMap[0].object;
-            }
-            const addresses = await db0.cache.where("objectName").equals('addresses').toArray();
-            if (addresses.length == 1) {
-              this.addresses = addresses[0].object;
-              for (const [k, v] of Object.entries(this.addresses)) {
-                if (!('type' in v)) {
-                  v.type = null;
-                }
-                if (!('mine' in v)) {
-                  v.mine = false;
-                }
-                // console.log("mount addresses: " + k + " => " + JSON.stringify(v));
-              }
-            }
-            const importData = await db0.cache.where("objectName").equals('importData').toArray();
-            if (importData.length == 1) {
-              this.importData = importData[0].object;
-              // console.log("mount this.importData: " + JSON.stringify(this.importData));
-            }
-            db0.close();
-          })();
+          // if ('selectedAddresses' in localStorage) {
+          //   this.selectedAddresses = JSON.parse(localStorage.selectedAddresses);
+          // }
+          // if ('selectedTxs' in localStorage) {
+          //   this.selectedTxs = JSON.parse(localStorage.selectedTxs);
+          // }
+          // if ('settings' in localStorage) {
+          //   // console.log("mounted - before - this.settings: " + JSON.stringify(this.settings, null, 2));
+          //   // console.log("mounted - before - localStorage.settings: " + localStorage.settings);
+          //   this.settings = { ...this.settings, ...JSON.parse(localStorage.settings) };
+          //
+          //   if (this.settings.txs.currentPage > 1) {
+          //     this.settings.txs.currentPage = 1;
+          //   }
+          //   if (this.settings.addressTable.currentPage > 1) {
+          //     this.settings.addressTable.currentPage = 1;
+          //   }
+          //   if (!('addressTypeFilter' in this.settings.addressTable)) {
+          //     console.log("Adding addressTypeFilter");
+          //     this.settings.addressTable.addressTypeFilter = null;
+          //   }
+          //   if (!('searchAddresses' in this.settings.addressTable)) {
+          //     console.log("Adding settings.addressTable.searchAddresses");
+          //     this.settings.addressTable.searchAddresses = null;
+          //   }
+          //   if (!('addressMineFilter' in this.settings.addressTable)) {
+          //     console.log("Adding addressMineFilter");
+          //     this.settings.addressTable.addressMineFilter = null;
+          //   }
+          //   if (!('showDetails' in this.settings.addressTable)) {
+          //     console.log("Adding addressTable.showDetails");
+          //     this.settings.addressTable.showDetails = {};
+          //   }
+          //   if (!('searchTxs' in this.settings.txs)) {
+          //     console.log("Adding settings.txs.searchTxs");
+          //     this.settings.txs.searchTxs = null;
+          //   }
+          //   if (!('showDetails' in this.settings.txs)) {
+          //     console.log("Adding txs.showDetails");
+          //     this.settings.txs.showDetails = {};
+          //   }
+          //   if ('showAddresses' in this.settings) {
+          //     console.log("Removing showAddresses");
+          //     delete this.settings['showAddresses'];
+          //   }
+          //   if (!('etherscanAPIKey' in this.settings)) {
+          //     console.log("Adding etherscanAPIKey");
+          //     this.settings.etherscanAPIKey = null;
+          //   }
+          //   console.log("mounted - after: " + JSON.stringify(this.settings, null, 2));
+          // }
+          // (async() => {
+          //   const db0 = new Dexie(this.db.name);
+          //   db0.version(this.db.version).stores(this.db.schemaDefinition);
+          //   const txHashes = await db0.cache.where("objectName").equals('txHashes').toArray();
+          //   if (txHashes.length == 1) {
+          //     this.txHashes = txHashes[0].object;
+          //   }
+          //   const ensMap = await db0.cache.where("objectName").equals('ensMap').toArray();
+          //   if (ensMap.length == 1) {
+          //     this.ensMap = ensMap[0].object;
+          //   }
+          //   const addresses = await db0.cache.where("objectName").equals('addresses').toArray();
+          //   if (addresses.length == 1) {
+          //     this.addresses = addresses[0].object;
+          //     for (const [k, v] of Object.entries(this.addresses)) {
+          //       if (!('type' in v)) {
+          //         v.type = null;
+          //       }
+          //       if (!('mine' in v)) {
+          //         v.mine = false;
+          //       }
+          //       // console.log("mount addresses: " + k + " => " + JSON.stringify(v));
+          //     }
+          //   }
+          //   const importData = await db0.cache.where("objectName").equals('importData').toArray();
+          //   if (importData.length == 1) {
+          //     this.importData = importData[0].object;
+          //     // console.log("mount this.importData: " + JSON.stringify(this.importData));
+          //   }
+          //   db0.close();
+          // })();
         },
       })
     </script>
