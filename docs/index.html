@@ -220,20 +220,12 @@
             { key: 'number', label: '#', sortable: false, thStyle: 'width: 5%;', tdClass: 'text-truncate' },
             { key: 'owner', label: 'Owner', sortable: false, thStyle: 'width: 30%;', tdClass: 'text-truncate' },
             { key: 'collections', label: 'Collections', sortable: false, thStyle: 'width: 65%;', tdClass: 'text-truncate' },
-            // { key: 'type', label: 'Type', sortable: false, thStyle: 'width: 10%;', tdClass: 'text-truncate' },
-            // { key: 'mine', label: 'Mine', sortable: false, thStyle: 'width: 10%;', tdClass: 'text-truncate' },
-            // // { key: 'ens', label: 'ENS', sortable: false, thStyle: 'width: 10%;', tdClass: 'text-truncate' },
-            // { key: 'group', label: 'Group', sortable: false, thStyle: 'width: 10%;', tdClass: 'text-truncate' },
-            // { key: 'name', label: 'Name', sortable: false, thStyle: 'width: 15%;', tdClass: 'text-truncate' },
-            // { key: 'notes', label: 'Notes', sortable: false, thStyle: 'width: 10%;', tdClass: 'text-truncate' },
-            // { key: 'end', label: '', sortable: false, thStyle: 'width: 10%;', thClass: 'text-right', tdClass: 'text-right' },
           ],
           db: {
             name: "nftowner089",
             version: 1,
             schemaDefinition: {
               cache: '&objectName',
-              // collection: '&address',
             },
             updated: null,
           },
@@ -280,22 +272,6 @@
             } catch (err) {
             }
             return e.toFixed(9);
-          },
-          addressName(address, length = 24) {
-            if (address in this.addresses) {
-              // console.log(JSON.stringify(this.addresses[address]));
-              const item = this.addresses[address];
-              if (item.name != null) {
-                if (item.group != null) {
-                  return { name: item.group + ':' + item.name, type: 'name' };
-                } else {
-                  return { name: item.name, type: 'name' };
-                }
-              } else if (item.ensName != null) {
-                return { name: item.ensName, type: 'ens' };
-              }
-            }
-            return address == null ? { name: null, type: 'null' } : { name: address.substring(0, length), type: 'address' };
           },
           ensOrAddress(address, length = 0) {
             if (this.ensMap) {
@@ -507,7 +483,6 @@
                 this.sync.total = owners.count;
                 this.sync.section = "Secondary collection";
                 for (let owner of owners) {
-                  // console.log("Processing: " + owner);
                   let stop = false;
                   for (let offset = 0; !stop; offset++) {
                     // https://api.reservoir.tools/users/0xF296178d553C8Ec21A2fBD2c5dDa8CA9ac905A00/tokens/v5?sortBy=acquiredAt&sortDirection=desc&offset=0&limit=20&includeTopBid=false
@@ -522,9 +497,13 @@
                          return [];
                       });
                     // continuation = data.continuation;
-                    if (data && data.tokens && data.tokens.length > 0 && offset < 3) {
-                      console.log(JSON.stringify(data.tokens, null, 2));
-                    //   for (const tokenData of data.tokens) {
+                    if (data && data.tokens && data.tokens.length > 0 && offset < 1) {
+                      // console.log(JSON.stringify(data.tokens, null, 2));
+
+                      // const contract = data.tokens
+
+                      for (const tokenData of data.tokens) {
+                        console.log(JSON.stringify(tokenData, null, 2));
                     //     const token = tokenData.token;
                     //     mainTokens[token.tokenId] = {
                     //       owner: token.owner,
@@ -535,7 +514,7 @@
                     //       this.mainToken.collection.image = token.collection.image;
                     //       this.mainToken.collection.slug = token.collection.slug;
                     //     }
-                    //   }
+                      }
                     } else {
                       stop = true;
                     }
@@ -548,147 +527,6 @@
                   }
                 }
               }
-
-
-              // TODO
-              if (false && action == "importFromEtherscan") {
-                const address = parameters;
-                const apikey = this.settings.etherscanAPIKey || "YourApiKeyToken";
-                let importUrl = "https://api.etherscan.io/api?module=account&action=txlist&address=" + address + "&startblock=0&endblock=" + blockNumber + "&page=1&offset=10000&sort=asc&apikey=" + apikey;
-                // console.log("importUrl: " + importUrl);
-                const importData = await fetch(importUrl)
-                  .then(handleErrors)
-                  .then(response => response.json())
-                  .catch(function(error) {
-                     console.log("ERROR - processIt: " + error);
-                     // Want to work around API data unavailablity - state.sync.error = true;
-                     return [];
-                  });
-                console.log("importData: " + JSON.stringify(importData, null, 2));
-                if (importData.status == 1) {
-                  Vue.set(this.importData, address, {
-                    address,
-                    timestamp,
-                    result: importData.result,
-                  })
-                  await db0.cache.put({ objectName: 'importData', object: this.importData }).then (function() {
-                  }).catch(function(error) {
-                    console.log("error: " + error);
-                  });
-                }
-              }
-
-              if (false && (action == "connect" || action == "addAddresses")) {
-                const addAddresses = (action == "connect") ? [this.coinbase] : (this.addressesToAdd == null ? [] : this.addressesToAdd.split(/[, \t\n]+/).filter(name => (name.length == 42 && name.substring(0, 2) == '0x')));
-                for (let address of addAddresses) {
-                  try {
-                    console.log("Processing address: " + address);
-                    const checksummedAddress = ethers.utils.getAddress(address);
-                    if (checksummedAddress && !(checksummedAddress in this.addresses)) {
-                      const info = await getAddressInfo(checksummedAddress, erc721Helper, provider);
-                      console.log("info: " + JSON.stringify(info, null, 2));
-                      Vue.set(this.addresses, checksummedAddress, {
-                        address: checksummedAddress,
-                        type: info && info.type || null,
-                        mine: address == this.coinbase,
-                        ensName: null,
-                        group: null,
-                        name: info && info.symbol && info.name && (info.symbol + ': ' + info.name) || null,
-                        tags: [],
-                        notes: null,
-                        contract: {
-                          name: info && info.name || null,
-                          symbol: info && info.symbol || null,
-                          decimals: info && info.decimals || null,
-                        }
-                      });
-                    }
-                  } catch (e) {
-                    console.log(e.toString());
-                  }
-                }
-                await db0.cache.put({ objectName: 'addresses', object: this.addresses }).then (function() {
-                }).catch(function(error) {
-                  console.log("error: " + error);
-                });
-              }
-
-
-              if (false && (action == "addAddresses" || action == "retrieveData" || action == "connect")) {
-                const ensMap = {};
-                // TODO
-                // ensMap[this.coinbase] = this.coinbase;
-                // for (const txItem of Object.values(this.txHashes)) {
-                //   if (txItem.timestamp != null) {
-                //     const from = txItem.data.tx && txItem.data.tx.from || null;
-                //     if (from && !ensMap[from]) {
-                //       ensMap[from] = from;
-                //     }
-                //     const to = txItem.data.tx && txItem.data.tx.to || null;
-                //     if (to && !ensMap[to]) {
-                //       ensMap[to] = to;
-                //     }
-                //   }
-                // }
-                // console.log("ensMap: " + JSON.stringify(ensMap, null, 2));
-
-                for (const addressItem of Object.values(this.addresses)) {
-                  if (addressItem.address && !ensMap[addressItem.address]) {
-                    ensMap[addressItem.address] = addressItem.address;
-                  }
-                }
-
-                this.sync.completed = 0;
-                const addresses = Object.keys(ensMap);
-                this.sync.total = addresses.length;
-                this.sync.section = "ENS Names";
-                for (let i = 0; i < addresses.length & !this.sync.halt; i += ENSOWNERBATCHSIZE) {
-                  const batch = addresses.slice(i, parseInt(i) + ENSOWNERBATCHSIZE);
-                  // console.log("batch: " + JSON.stringify(batch));
-                  const allnames = await ensReverseRecordsContract.getNames(batch);
-                  for (let j = 0; j < batch.length; j++) {
-                    const address = batch[j];
-                    const name = allnames[j];
-                    ensMap[address] = name != null && name.length > 0 ? name : address;
-                    // const normalized = normalize(address);
-                  }
-                  this.sync.completed = parseInt(this.sync.completed) + batch.length;
-                }
-                this.ensMap = ensMap;
-                await db0.cache.put({ objectName: 'ensMap', object: ensMap }).then (function() {
-                }).catch(function(error) {
-                  console.log("error: " + error);
-                });
-
-                for (const [address, ensName] of Object.entries(ensMap)) {
-                  if (address in this.addresses) {
-                    if (this.addresses[address].ensName != ensName) {
-                      Vue.set(this.addresses[address], 'ensName', ensName);
-                    }
-                  } else {
-                    Vue.set(this.addresses, address, {
-                      address: address,
-                      type: address == this.coinbase ? "eoa" : null,
-                      mine: address == this.coinbase ? true : false,
-                      ensName: ensName,
-                      group: null,
-                      name: null,
-                      tags: [],
-                      notes: null,
-                      contract: {
-                        name: null,
-                        symbol: null,
-                      },
-                    });
-                  }
-                }
-                // console.log(JSON.stringify(this.addresses));
-                await db0.cache.put({ objectName: 'addresses', object: this.addresses }).then (function() {
-                }).catch(function(error) {
-                  console.log("error: " + error);
-                });
-              }
-
 
               db0.close();
               this.sync.section = null;
@@ -716,38 +554,6 @@
           //   if (this.settings.addressTable.currentPage > 1) {
           //     this.settings.addressTable.currentPage = 1;
           //   }
-          //   if (!('addressTypeFilter' in this.settings.addressTable)) {
-          //     console.log("Adding addressTypeFilter");
-          //     this.settings.addressTable.addressTypeFilter = null;
-          //   }
-          //   if (!('searchAddresses' in this.settings.addressTable)) {
-          //     console.log("Adding settings.addressTable.searchAddresses");
-          //     this.settings.addressTable.searchAddresses = null;
-          //   }
-          //   if (!('addressMineFilter' in this.settings.addressTable)) {
-          //     console.log("Adding addressMineFilter");
-          //     this.settings.addressTable.addressMineFilter = null;
-          //   }
-          //   if (!('showDetails' in this.settings.addressTable)) {
-          //     console.log("Adding addressTable.showDetails");
-          //     this.settings.addressTable.showDetails = {};
-          //   }
-          //   if (!('searchTxs' in this.settings.txs)) {
-          //     console.log("Adding settings.txs.searchTxs");
-          //     this.settings.txs.searchTxs = null;
-          //   }
-          //   if (!('showDetails' in this.settings.txs)) {
-          //     console.log("Adding txs.showDetails");
-          //     this.settings.txs.showDetails = {};
-          //   }
-          //   if ('showAddresses' in this.settings) {
-          //     console.log("Removing showAddresses");
-          //     delete this.settings['showAddresses'];
-          //   }
-          //   if (!('etherscanAPIKey' in this.settings)) {
-          //     console.log("Adding etherscanAPIKey");
-          //     this.settings.etherscanAPIKey = null;
-          //   }
           //   console.log("mounted - after: " + JSON.stringify(this.settings, null, 2));
           // }
           (async() => {
@@ -763,24 +569,6 @@
               this.ensMap = ensMap[0].object;
               // console.log("mounted - ensMap: " + JSON.stringify(this.ensMap, null, 2));
             }
-            // const addresses = await db0.cache.where("objectName").equals('addresses').toArray();
-            // if (addresses.length == 1) {
-            //   this.addresses = addresses[0].object;
-            //   for (const [k, v] of Object.entries(this.addresses)) {
-            //     if (!('type' in v)) {
-            //       v.type = null;
-            //     }
-            //     if (!('mine' in v)) {
-            //       v.mine = false;
-            //     }
-            //     // console.log("mount addresses: " + k + " => " + JSON.stringify(v));
-            //   }
-            // }
-            // const importData = await db0.cache.where("objectName").equals('importData').toArray();
-            // if (importData.length == 1) {
-            //   this.importData = importData[0].object;
-            //   // console.log("mount this.importData: " + JSON.stringify(this.importData));
-            // }
             db0.close();
           })();
         },
