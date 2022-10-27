@@ -223,46 +223,22 @@
                 <font size="-2" v-b-popover.hover.top="'# txs'">{{ filteredSortedCrossTab.length }}</font>
               </div>
               <div class="mt-0 pr-1">
-                <b-pagination size="sm" v-model="settings.crossTab.currentPage" @input="settingsUpdated" :total-rows="filteredSortedMainTable.length" :per-page="settings.crossTab.pageSize" style="height: 0;"></b-pagination>
+                <b-pagination size="sm" v-model="settings.crossTab.currentPage" @input="settingsUpdated" :total-rows="filteredSortedCrossTab.length" :per-page="settings.crossTab.pageSize" style="height: 0;"></b-pagination>
               </div>
               <div class="mt-0 pl-1">
                 <b-form-select size="sm" v-model="settings.crossTab.pageSize" @change="settingsUpdated" :options="pageSizes" v-b-popover.hover.top="'Addresses page size'"></b-form-select>
               </div>
             </div>
-            <!-- <b-table small fixed striped selectable responsive hover :fields="mainTableFields" :items="pagedFilteredSortedMainTable" show-empty empty-html="Enter ERC-721 NFT collection address in the top left input field and click Retrieve" head-variant="light" class="m-0 mt-1"> -->
             <b-table small fixed striped selectable responsive hover :fields="crossTabFields" :items="pagedFilteredSortedCrossTab" show-empty empty-html="Enter ERC-721 NFT collection address in the top left input field and click Retrieve" head-variant="light" class="m-0 mt-1">
+              <template #head()="data">
+                <b-avatar rounded variant="light" size="3.0rem" :src="data.field.image" v-b-popover.hover="data.field.label" >
+                </b-avatar>
+              </template>
               <template #cell(owner)="data">
                 {{ data.item.owner }}
               </template>
-              <template #cell(c0)="data">
-                {{ data.item.c0 && data.item.c0.length || '' }}
-              </template>
-              <template #cell(c1)="data">
-                {{ data.item.c1 && data.item.c1.length || '' }}
-              </template>
-              <template #cell(c2)="data">
-                {{ data.item.c2 && data.item.c2.length || '' }}
-              </template>
-              <template #cell(c3)="data">
-                {{ data.item.c3 && data.item.c3.length || '' }}
-              </template>
-              <template #cell(c4)="data">
-                {{ data.item.c4 && data.item.c4.length || '' }}
-              </template>
-              <template #cell(c5)="data">
-                {{ data.item.c5 && data.item.c5.length || '' }}
-              </template>
-              <template #cell(c6)="data">
-                {{ data.item.c6 && data.item.c6.length || '' }}
-              </template>
-              <template #cell(c7)="data">
-                {{ data.item.c7 && data.item.c7.length || '' }}
-              </template>
-              <template #cell(c8)="data">
-                {{ data.item.c8 && data.item.c8.length || '' }}
-              </template>
-              <template #cell(c9)="data">
-                {{ data.item.c9 && data.item.c9.length || '' }}
+              <template #cell()="data">
+                {{ data.value && data.value.length || '' }}
               </template>
             </b-table>
           </b-card>
@@ -519,14 +495,18 @@
             const order = [
               "0x31385d3520bced94f77aae104b406994d8f2168c",
               "0xb47e3cd837ddf8e4c57f05d70ab865de6e193bbb",
-              "0x282bdd42f4eb70e7a9d9f40c8fea0825b7f68c5d"
+              "0x282bdd42f4eb70e7a9d9f40c8fea0825b7f68c5d",
+              "0xe8e2b12e02cefc12603e99cd414d9d9ec82068cf",
+              "0x2f46e37477ca4033d74986b15f0572e9913b4858",
             ];
             const results = [];
-            results.push({ key: 'owner', label: 'Owner', tdClass: 'text-truncate' })
+            results.push({ key: 'owner', label: 'Owner', thStyle: 'width: 30%;', tdClass: 'text-truncate' })
             for (const contractIndex in order) {
               const contract = order[contractIndex];
               const collection = this.collections[contract];
-              results.push({ key: 'c' + contractIndex, label: collection.name, tdClass: 'text-truncate', image: collection.image })
+              if (collection) {
+                results.push({ key: 'c' + contractIndex, label: collection.name, tdClass: 'text-truncate', thClass: 'text-right', tdClass: 'text-right', image: collection.image })
+              }
             }
             return results;
           },
@@ -535,7 +515,9 @@
             const order = [
               "0x31385d3520bced94f77aae104b406994d8f2168c",
               "0xb47e3cd837ddf8e4c57f05d70ab865de6e193bbb",
-              "0x282bdd42f4eb70e7a9d9f40c8fea0825b7f68c5d"
+              "0x282bdd42f4eb70e7a9d9f40c8fea0825b7f68c5d",
+              "0xe8e2b12e02cefc12603e99cd414d9d9ec82068cf",
+              "0x2f46e37477ca4033d74986b15f0572e9913b4858",
             ];
             console.log("filteredCrossTab: " + JSON.stringify(order));
 
