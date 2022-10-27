@@ -206,6 +206,34 @@
             </b-table>
           </b-card>
 
+          <b-card class="m-0 p-0 border-0" no-body body-class="m-1 p-0" header-class="m-0 p-2">
+            <template #header>
+              CrossTab
+            </template>
+            <div class="d-flex flex-wrap m-0 mt-1 p-0">
+              <div class="mt-0 pr-1">
+                <b-form-input type="text" size="sm" v-model.trim="settings.mainCollection" @change="settingsUpdated" debounce="600" v-b-popover.hover.top="'Main collection to start from'" placeholder="0x{NFT collection address}" style="min-width: 12.0rem;"></b-form-input>
+              </div>
+              <div class="mt-0 flex-grow-1">
+              </div>
+              <div class="mt-0 pr-1">
+                <b-form-select size="sm" v-model="settings.crossTab.sortOption" @change="settingsUpdated" :options="mainTableSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
+              </div>
+              <div class="mt-0 pr-1">
+                <font size="-2" v-b-popover.hover.top="'# txs'">{{ filteredSortedCrossTab.length }}</font>
+              </div>
+              <div class="mt-0 pr-1">
+                <b-pagination size="sm" v-model="settings.crossTab.currentPage" @input="settingsUpdated" :total-rows="filteredSortedMainTable.length" :per-page="settings.crossTab.pageSize" style="height: 0;"></b-pagination>
+              </div>
+              <div class="mt-0 pl-1">
+                <b-form-select size="sm" v-model="settings.crossTab.pageSize" @change="settingsUpdated" :options="pageSizes" v-b-popover.hover.top="'Addresses page size'"></b-form-select>
+              </div>
+            </div>
+            <!-- <b-table small fixed striped selectable responsive hover :fields="mainTableFields" :items="pagedFilteredSortedMainTable" show-empty empty-html="Enter ERC-721 NFT collection address in the top left input field and click Retrieve" head-variant="light" class="m-0 mt-1"> -->
+            <b-table small fixed striped selectable responsive hover :items="pagedFilteredSortedCrossTab" show-empty empty-html="Enter ERC-721 NFT collection address in the top left input field and click Retrieve" head-variant="light" class="m-0 mt-1">
+            </b-table>
+          </b-card>
+
           <b-card v-if="false" class="m-0 p-0 border-0" body-class="m-1 p-0" header-class="m-0 p-2">
             <template #header>
               Owners
@@ -331,6 +359,12 @@
               pageSize: 10,
               sortOption: 'nameasc',
             },
+            crossTab: {
+              filter: null,
+              currentPage: 1,
+              pageSize: 10,
+              sortOption: 'countdsc',
+            },
             mainTable: {
               filter: null,
               currentPage: 1,
@@ -441,6 +475,35 @@
           },
           pagedFilteredSortedCollections() {
             return this.filteredSortedCollections.slice((this.settings.collections.currentPage - 1) * this.settings.collections.pageSize, this.settings.collections.currentPage * this.settings.collections.pageSize);
+          },
+          filteredCrossTab() {
+            const results = [];
+            for (const [contract, item] of Object.entries(this.collections)) {
+              results.push({
+                contract,
+                name: item.name,
+                slug: item.slug,
+                image: item.image,
+                volume: item.volume,
+                tokens: item.tokens,
+                owners: item.owners,
+                updated: item.updated,
+              });
+            }
+            console.log("filteredCrossTab: " + JSON.stringify(results.slice(0, 10)));
+            return results;
+          },
+          filteredSortedCrossTab() {
+            let results = this.filteredCrossTab;
+            // if (this.settings.mainTable.sortOption == 'countasc') {
+            //   results.sort((a, b) => a.count - b.count);
+            // } else if (this.settings.mainTable.sortOption == 'countdsc') {
+            //   results.sort((a, b) => b.count - a.count);
+            // }
+            return results;
+          },
+          pagedFilteredSortedCrossTab() {
+            return this.filteredSortedCrossTab.slice((this.settings.crossTab.currentPage - 1) * this.settings.crossTab.pageSize, this.settings.crossTab.currentPage * this.settings.crossTab.pageSize);
           },
           filteredMainTable() {
             const results = [];
@@ -1014,7 +1077,7 @@
             const collections = await db0.cache.where("objectName").equals('collections').toArray();
             if (collections.length == 1) {
               this.collections = collections[0].object;
-              console.log("mounted - collections: " + JSON.stringify(this.collections, null, 2));
+              // console.log("mounted - collections: " + JSON.stringify(this.collections, null, 2));
             }
             const mainToken = await db0.cache.where("objectName").equals('mainToken').toArray();
             if (mainToken.length == 1) {
