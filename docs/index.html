@@ -67,9 +67,148 @@
           </b-card>
 
           <b-card class="m-0 p-0 border-0" body-class="m-1 p-0" header-class="m-0 p-2">
-            <!-- <template #header>
-              Addresses
-            </template> -->
+            <template #header>
+              Collections
+            </template>
+            <div class="d-flex flex-wrap m-0 p-0">
+              <div v-if="false" class="mt-0 pr-1">
+                <b-form-input type="text" size="sm" v-model.trim="settings.collections.filter" @change="settingsUpdated" debounce="600" v-b-popover.hover.top="'Collection name filter'" placeholder="🔍 collection" style="min-width: 12.0rem;"></b-form-input>
+              </div>
+              <div class="mt-0 pr-1">
+                <b-button size="sm" :disabled="sync.section != null" @click="processIt('syncCollections')" variant="primary" v-b-popover.hover.top="'Sync selected or all collections'">Sync</b-button>
+              </div>
+              <div class="mt-0 pr-1">
+                <b-button size="sm" :disabled="sync.section != null || Object.keys(selectedCollections).length == 0" @click="deleteCollections" variant="link" v-b-popover.hover="'Delete selected collections'"><b-icon-trash style="color: #ff0000;" shift-v="+1" font-scale="1.0"></b-icon-trash></b-button>
+              </div>
+              <!-- <div class="mt-0 pr-1">
+                <b-button size="sm" :disabled="sync.section != null && searchCollections.filter != null && searchCollections.filter.length > 0" @click="doSearchCollections" variant="link" v-b-popover.hover.top="'Search for collection name'">Search</b-button>
+              </div> -->
+              <!-- <div class="mt-0 pr-1">
+                <b-button size="sm" :disabled="sync.section != null || settings.mainCollection == null || settings.mainCollection.length == 0" @click="processIt('retrieveMainCollection')" variant="primary" v-b-popover.hover.top="'Retrieve main collection data'">Retrieve Main</b-button>
+              </div>
+              <div class="mt-0 pr-1">
+                <b-button size="sm" :disabled="sync.section != null || filteredSortedMainTable.length == 0" @click="processIt('retrieveSecondaryCollection')" variant="primary" v-b-popover.hover.top="'Retrieve secondary collection data'">Retrieve Secondary</b-button>
+              </div> -->
+              <!-- <div class="mt-0 pr-1">
+                <b-form-input type="text" size="sm" v-model.trim="settings.addressTable.searchAddresses" @change="settingsUpdated" debounce="600" v-b-popover.hover.top="'Filter by partial address, name'" placeholder="🔍 address"></b-form-input>
+              </div> -->
+              <div class="mt-0 flex-grow-1">
+              </div>
+              <div class="mt-1" style="width: 200px;">
+                <b-progress v-if="sync.section != null" height="1.5rem" :max="sync.total" show-progress :animated="sync.section != null" :variant="sync.section != null ? 'success' : 'secondary'" v-b-popover.hover.top="'Click the button on the right to stop. This process can be continued later'">
+                  <b-progress-bar :value="sync.completed">
+                    {{ sync.total == null ? (sync.completed + ' ' + sync.section) : (sync.completed + '/' + sync.total + ' ' + ((sync.completed / sync.total) * 100).toFixed(0) + '% ' + sync.section) }}
+                  </b-progress-bar>
+                </b-progress>
+              </div>
+              <div class="ml-0 mt-1">
+                <b-button v-if="sync.section != null" size="sm" @click="halt" variant="link" v-b-popover.hover.top="'Click to stop. It may take a few minutes to clean up. This process can be continued later'"><b-icon-stop-fill shift-v="+1" font-scale="1.0"></b-icon-stop-fill></b-button>
+              </div>
+              <div class="mt-0 flex-grow-1">
+              </div>
+              <div class="mt-0 pr-1">
+                <b-button size="sm" :pressed.sync="settings.addCollection" @click="settingsUpdated" variant="link" v-b-popover.hover.top="'Add new collection'"><span v-if="settings.addCollection"><b-icon-plus-square-fill shift-v="+1" font-scale="1.0"></b-icon-plus-square-fill></span><span v-else><b-icon-plus-square shift-v="+1" font-scale="1.0"></b-icon-plus-square></span></b-button>
+              </div>
+              <div class="mt-0 flex-grow-1">
+              </div>
+              <!-- <div class="mt-0 flex-grow-1">
+              </div>
+              <div class="mt-0 pr-0">
+                <b-button size="sm" :pressed.sync="settings.addAddresses" @click="settingsUpdated" variant="link" v-b-popover.hover.top="'Add addresses, tx hashes, Etherscan API key'"><span v-if="settings.addAddresses"><b-icon-plus-square-fill shift-v="+1" font-scale="1.0"></b-icon-plus-square-fill></span><span v-else><b-icon-plus-square shift-v="+1" font-scale="1.0"></b-icon-plus-square></span></b-button>
+              </div>
+              <div class="mt-0 pr-1">
+                <b-button size="sm" :pressed.sync="settings.editAddresses" @click="settingsUpdated" :variant="settings.editAddresses ? 'danger' : 'link'" v-b-popover.hover.top="settings.editAddresses ? 'End editing address attributes' : 'Edit address attributes'"><b-icon-pencil shift-v="+1" font-scale="1.0"></b-icon-pencil></b-button>
+              </div> -->
+              <!-- <div class="mt-0 flex-grow-1">
+              </div> -->
+              <!-- <div class="mt-0 pr-1">
+                <b-button size="sm" @click="exportAddresses" variant="link">Export</b-button>
+              </div> -->
+              <!-- <div class="mt-0 flex-grow-1">
+              </div> -->
+              <div class="mt-0 pr-1">
+                <b-form-select size="sm" v-model="settings.collections.sortOption" @change="settingsUpdated" :options="collectionsSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
+              </div>
+              <div class="mt-0 pr-1">
+                <font size="-2" v-b-popover.hover.top="'# txs'">{{ filteredSortedCollections.length }}</font>
+              </div>
+              <div class="mt-0 pr-1">
+                <b-pagination size="sm" v-model="settings.collections.currentPage" @input="settingsUpdated" :total-rows="filteredSortedCollections.length" :per-page="settings.collections.pageSize" style="height: 0;"></b-pagination>
+              </div>
+              <div class="mt-0 pl-1">
+                <b-form-select size="sm" v-model="settings.collections.pageSize" @change="settingsUpdated" :options="pageSizes" v-b-popover.hover.top="'Addresses page size'"></b-form-select>
+              </div>
+            </div>
+            <!-- <b-card>
+              {{ searchCollections.results }}
+            </b-card> -->
+            <b-card v-if="settings.addCollection" class="mx-5 mt-1 mb-0 p-0 border-1" no-body body-class="m-0 p-0" header-class="m-0 p-0">
+              <b-card-header>
+                Add Collection
+              </b-card-header>
+              <b-card-text>
+                <div class="d-flex flex-wrap m-1 p-0">
+                  <div class="mt-0 pr-1">
+                    <b-form-input type="text" size="sm" v-model.trim="searchCollections.filter" @input="doSearchCollections" debounce="600" v-b-popover.hover.top="'Collection name filter'" placeholder="🔍 collection name" style="min-width: 12.0rem;"></b-form-input>
+                  </div>
+                </div>
+                <b-table small fixed striped responsive hover :fields="searchCollectionsFields" :items="searchCollections.results" show-empty empty-html="Enter name fragment in the top left input field" head-variant="light" class="m-0">
+                  <template #cell(action)="data">
+                    <b-button v-if="!(data.item.contract in collections)" size="sm" @click="addCollection(data.item)" variant="primary">Add</b-button>
+                    <b-button v-if="data.item.contract in collections" disabled size="sm" @click="addCollection(data.item)" variant="outline-primary">Added</b-button>
+                  </template>
+                  <template #cell(collection)="data">
+                    <div class="d-flex flex-row">
+                      <div>
+                        <b-avatar rounded variant="light" size="3.0rem" :src="data.item.image">
+                        </b-avatar>
+                      </div>
+                      <div class="ml-2">
+                        {{ data.item.name }}
+                        <br />
+                        Volume: 1d {{ commify(data.item.volume["1day"]) + 'e' }}; 7d {{ commify(data.item.volume["7day"]) + 'e' }}; 30d {{ commify(data.item.volume["30day"]) + 'e' }}; allTime {{ commify(data.item.volume["allTime"]) + 'e' }}
+                      </div>
+                    </div>
+                  </template>
+                </b-table>
+              </b-card-text>
+            </b-card>
+
+            <b-table small fixed striped responsive hover :fields="collectionsFields" :items="pagedFilteredSortedCollections" show-empty empty-html="Click [+] above to add new collections" head-variant="light" class="mx-0 my-1">
+              <template #head(number)="data">
+                <b-dropdown size="sm" variant="link" v-b-popover.hover="'Toggle selection'">
+                  <template #button-content>
+                    <b-icon-check-square shift-v="+1" font-scale="0.9"></b-icon-check-square>
+                  </template>
+                  <b-dropdown-item href="#" @click="toggleSelectedCollections(pagedFilteredSortedCollections)">Toggle selection for all addresses on this page</b-dropdown-item>
+                  <b-dropdown-item href="#" @click="toggleSelectedCollections(filteredSortedCollections)">Toggle selection for all addresses on all pages</b-dropdown-item>
+                  <b-dropdown-item href="#" @click="clearSelectedCollections()">Clear selection</b-dropdown-item>
+                </b-dropdown>
+              </template>
+              <template #cell(number)="data">
+                <b-form-checkbox size="sm" :checked="selectedCollections[data.item.contract] ? 1 : 0" value="1" @change="toggleSelectedCollections([data.item])">
+                  {{ parseInt(data.index) + ((settings.collections.currentPage - 1) * settings.collections.pageSize) + 1 }}
+                </b-form-checkbox>
+              </template>
+              <template #cell(collection)="data">
+                <div class="d-flex flex-row">
+                  <div>
+                    <b-avatar rounded variant="light" size="3.0rem" :src="data.item.image">
+                    </b-avatar>
+                  </div>
+                  <div class="ml-2">
+                    {{ data.item.name }}
+                    <br />
+                    Volume: 1d {{ commify(data.item.volume["1day"]) + 'e' }}; 7d {{ commify(data.item.volume["7day"]) + 'e' }}; 30d {{ commify(data.item.volume["30day"]) + 'e' }}; allTime {{ commify(data.item.volume["allTime"]) + 'e' }}
+                  </div>
+                </div>
+              </template>
+            </b-table>
+          </b-card>
+          <b-card class="m-0 p-0 border-0" body-class="m-1 p-0" header-class="m-0 p-2">
+            <template #header>
+              Owners
+            </template>
             <div class="d-flex flex-wrap m-0 p-0">
               <div class="mt-0 pr-1">
                 <b-form-input type="text" size="sm" v-model.trim="settings.mainCollection" @change="settingsUpdated" debounce="600" v-b-popover.hover.top="'Main collection to start from'" placeholder="0x{NFT collection address}" style="min-width: 12.0rem;"></b-form-input>
@@ -177,19 +316,42 @@
             // addAddresses: false,
             // editAddresses: false,
             // etherscanAPIKey: null,
-            mainTable: {
+            addCollection: false,
+
+            // collections: {
+            //   filter: 'bored', // TODO null,
+            //   max: 100,
+            //   results: [],
+            // },
+
+            collections: {
               filter: null,
               currentPage: 1,
               pageSize: 10,
+              sortOption: 'nameasc',
+            },
+            mainTable: {
+              filter: null,
+              currentPage: 1,
+              pageSize: 100,
               sortOption: 'countdsc',
             },
           },
+
+          searchCollections: {
+            filter: null,
+            results: [],
+          },
+
           sync: {
             section: null,
             total: null,
             completed: null,
             halt: false,
           },
+
+          collections: {},
+          collectionsData: {},
 
           mainToken: {
             tokens: {},
@@ -203,8 +365,13 @@
           secondaryData: {},
 
           ensMap: {},
+          selectedCollections: {},
           selectedMainTable: {},
 
+          collectionsSortOptions: [
+            { value: 'nameasc', text: '▲ Name' },
+            { value: 'namedsc', text: '▼ Name' },
+          ],
           mainTableSortOptions: [
             { value: 'countasc', text: '▲ Token Count' },
             { value: 'countdsc', text: '▼ Token Count' },
@@ -219,6 +386,15 @@
             { value: 1000, text: '1k' },
             { value: 2500, text: '2.5k' },
             { value: 10000, text: '10k' },
+          ],
+          // Id Name Slug Image Banner Token Count
+          searchCollectionsFields: [
+            { key: 'action', label: 'Action', sortable: false, thStyle: 'width: 10%;', tdClass: 'text-truncate' },
+            { key: 'collection', label: 'Collection', sortable: false, thStyle: 'width: 90%;', tdClass: 'text-truncate' },
+          ],
+          collectionsFields: [
+            { key: 'number', label: '#', sortable: false, thStyle: 'width: 5%;', tdClass: 'text-truncate' },
+            { key: 'collection', label: 'Collection', sortable: false, thStyle: 'width: 95%;', tdClass: 'text-truncate' },
           ],
           mainTableFields: [
             { key: 'number', label: '#', sortable: false, thStyle: 'width: 5%;', tdClass: 'text-truncate' },
@@ -237,6 +413,34 @@
 
         // --- COMPUTED ---
         computed: {
+          filteredCollections() {
+            const results = [];
+            for (const [contract, item] of Object.entries(this.collections)) {
+              results.push({
+                contract,
+                name: item.name,
+                slug: item.slug,
+                image: item.image,
+                volume: item.volume,
+                tokens: item.tokens,
+                owners: item.owners,
+                updated: item.updated,
+              });
+            }
+            return results;
+          },
+          filteredSortedCollections() {
+            let results = this.filteredCollections;
+            // if (this.settings.mainTable.sortOption == 'countasc') {
+            //   results.sort((a, b) => a.count - b.count);
+            // } else if (this.settings.mainTable.sortOption == 'countdsc') {
+            //   results.sort((a, b) => b.count - a.count);
+            // }
+            return results;
+          },
+          pagedFilteredSortedCollections() {
+            return this.filteredSortedCollections.slice((this.settings.collections.currentPage - 1) * this.settings.collections.pageSize, this.settings.collections.currentPage * this.settings.collections.pageSize);
+          },
           filteredMainTable() {
             const results = [];
             for (const [owner, data] of Object.entries(this.mainToken.owners)) {
@@ -265,17 +469,34 @@
             if (owner in this.secondaryData) {
               const mainContract = this.settings.mainCollection.toLowerCase();
               for (const [contract, item] of Object.entries(this.secondaryData[owner])) {
-                if (contract != mainContract) {
-                  results.push({ contract, collectionName: item.collectionName, collectionImage: item.collectionImage, count: item.tokens.length });
-                }
+                // if (contract != mainContract) {
+                  results.push({ contract, collectionName: item.collectionName, collectionImage: item.collectionImage, count: Object.keys(item.tokens).length });
+                // }
               }
-              results.sort((a, b) => b.count - a.count);
+              results.sort((a, b) => {
+                if (a.contract == mainContract) {
+                  return 1;
+                } else if (b.contract == mainContract) {
+                  return -1;
+                } else {
+                  return b.count - a.count;
+                }
+              });
             }
+            // if (owner == "0xc3b5284b2c0cfa1871a6ac63b6d6ee43c08bdc79") {
+            //   console.log(JSON.stringify(results));
+            // }
             return results;
           },
           async halt() {
             this.sync.halt = true;
             console.log("this.sync.halt: " + this.sync.halt);
+          },
+          commify(n) {
+            if (n != null) {
+              return ethers.utils.commify(n);
+            }
+            return null;
           },
           formatTimestamp(ts) {
             if (ts != null) {
@@ -297,6 +518,32 @@
               }
             }
             return address == null ? null : (length == 0 ? address : address.substring(0, length));
+          },
+          toggleSelectedCollections(items) {
+            console.log("toggleSelectedCollections: " + JSON.stringify(items));
+            let someFalse = false;
+            let someTrue = false;
+            for (const item of items) {
+              if (this.selectedCollections[item.contract]) {
+                someTrue = true;
+              } else {
+                someFalse = true;
+              }
+            }
+            for (const item of items) {
+              if (!(someTrue && !someFalse)) {
+                Vue.set(this.selectedCollections, item.contract, true);
+              } else {
+                Vue.delete(this.selectedCollections, item.contract);
+              }
+            }
+            localStorage.selectedCollections = JSON.stringify(this.selectedCollections);
+            console.log("selectedCollections: " + JSON.stringify(this.selectedCollections, null, 2));
+          },
+          clearSelectedCollections() {
+            console.log("clearSelectedCollections");
+            this.selectedCollections = {};
+            localStorage.selectedCollections = JSON.stringify(this.selectedCollections);
           },
           toggleSelectedMainTable(items) {
             let someFalse = false;
@@ -374,6 +621,88 @@
               document.getSelection().removeAllRanges();
               document.getSelection().addRange(selected);
             }
+          },
+          async addCollection(collection) {
+            console.log("addCollection: " + JSON.stringify(collection));
+            Vue.set(this.collections, collection.contract, {
+              name: collection.name,
+              slug: collection.slug,
+              image: collection.image,
+              tokenCount: collection.tokenCount,
+              onSaleCount: collection.onSaleCount,
+              volume: collection.volume,
+              tokens: {},
+              owners: {},
+              updated: null,
+            });
+            console.log(JSON.stringify(this.collections, null, 2));
+            const db0 = new Dexie(this.db.name);
+            db0.version(this.db.version).stores(this.db.schemaDefinition);
+            await db0.cache.put({ objectName: 'collections', object: this.collections }).then (function() {
+            }).catch(function(error) {
+              console.log("error: " + error);
+            });
+            db0.close();
+          },
+          async deleteCollections() {
+            console.log("deleteCollections");
+            for (const contract of Object.keys(this.selectedCollections)) {
+              console.log("Deleting: " + contract);
+              Vue.delete(this.collections, contract);
+            }
+            const db0 = new Dexie(this.db.name);
+            db0.version(this.db.version).stores(this.db.schemaDefinition);
+            await db0.cache.put({ objectName: 'collections', object: this.collections }).then (function() {
+            }).catch(function(error) {
+              console.log("error: " + error);
+            });
+            db0.close();
+          },
+          async doSearchCollections(filter) {
+            console.log("doSearchCollections - filter: " + JSON.stringify(filter));
+            this.settingsUpdated();
+            let continuation = null;
+            const results = [];
+            // if (this.searchCollections.filter != null && this.searchCollections.filter.length > 0) {
+              do {
+                // https://api.reservoir.tools/collections/v5?name=test&includeTopBid=false&sortBy=allTimeVolume&limit=20
+                let url = "https://api.reservoir.tools/collections/v5" +
+                  ((filter != null && filter.length > 0) ? "?name=" + filter + '&includeTopBid=false&sortBy=allTimeVolume&limit=20' : ''); // +
+                  // "&limit=50" +
+                  // (continuation != null ? "&continuation=" + continuation : '');
+                console.log("url: " + url);
+                const data = await fetch(url)
+                  .then(handleErrors)
+                  .then(response => response.json())
+                  .catch(function(error) {
+                     console.log("ERROR - updateCollection: " + error);
+                     // state.sync.error = true;
+                     return [];
+                  });
+                continuation = data.continuation;
+                // console.log(JSON.stringify(data, null, 2));
+                if (data && data.collections) {
+                  for (const collectionData of data.collections) {
+                    console.log(JSON.stringify(collectionData, null, 2));
+                    // const collectionId = collectionData.id;
+                    const contract = collectionData.id;
+                    const name = collectionData.name;
+                    const slug = collectionData.slug;
+                    const image = collectionData.image;
+                    const tokenCount = collectionData.tokenCount;
+                    const onSaleCount = collectionData.onSaleCount;
+                    const volume = collectionData.volume;
+                    const openseaVerificationStatus = collectionData.openseaVerificationStatus;
+                    if (!(contract in this.collections)) {
+                      results.push({ contract, name, slug, image, volume, openseaVerificationStatus });
+                    }
+                  }
+                }
+              } while (continuation != null && results.length < this.searchCollections.max /*&& !state.halt && !state.sync.error */);
+              results.sort((a, b) => b.allTimeVolume - a.allTimeVolume);
+            // }
+            Vue.set(this.searchCollections, 'results', results);
+            console.log("this.searchCollections.results: " + JSON.stringify(this.searchCollections.results, null, 2));
           },
           async processIt(action, parameters = null) {
             console.log("processIt - action: " + action + ", parameters: " + parameters);
@@ -491,13 +820,84 @@
                 this.sync.section = null;
               }
 
+              if (action == "syncCollections") {
+                console.log("syncCollections");
+                let contracts = [];
+                if (Object.keys(this.selectedCollections).length > 0) {
+                  contracts = Object.keys(this.selectedCollections);
+                } else {
+                  for (const record of this.filteredSortedCollections) {
+                    if (!(record.contract in this.secondaryData)) {
+                      contracts.push(record.contract);
+                    }
+                  }
+                }
+                console.log("contracts: " + JSON.stringify(contracts));
+                for (let contract of contracts) {
+                  console.log("Processing: " + contract + " " + JSON.stringify(this.collections[contract]));
+
+                  let continuation = null;
+                  this.sync.completed = 0;
+                  this.sync.total = null;
+                  this.sync.section = "Sync " + contract.substring(0, 10);
+                  const tokens = {};
+                  // this.mainToken.collection.name = null;
+                  do {
+                    let url = "https://api.reservoir.tools/tokens/v5?contract=" + contract + "&includeAttributes=false&limit=100" +
+                      (continuation != null ? "&continuation=" + continuation : '');
+                    console.log("url: " + url);
+                    const data = await fetch(url)
+                      .then(handleErrors)
+                      .then(response => response.json())
+                      .catch(function(error) {
+                         console.log("ERROR - updateCollection: " + error);
+                         // state.sync.error = true;
+                         return [];
+                      });
+                    // continuation = data.continuation;
+                    console.log(JSON.stringify(data, null, 2));
+                    if (data && data.tokens) {
+                      for (const tokenData of data.tokens) {
+                        const token = tokenData.token;
+                        tokens[token.tokenId] = {
+                          owner: token.owner,
+                          image: token.image,
+                        };
+                        // if (this.mainToken.collection.name == null) {
+                        //   this.mainToken.collection.name = token.collection.name;
+                        //   this.mainToken.collection.image = token.collection.image;
+                        //   this.mainToken.collection.slug = token.collection.slug;
+                        // }
+                      }
+                    }
+                    // this.sync.completed = Object.keys(mainTokens).length;
+                    await delay(500); // TODO: Adjust to avoid error 429 Too Many Requests. Fails at 200ms
+                  } while (continuation != null /*&& !state.halt && !state.sync.error */);
+                  console.log("tokens: " + JSON.stringify(tokens, null, 2));
+                  Vue.set(this.collections[contract], 'tokens', tokens);
+
+                  const owners = {};
+                  for (const [tokenId, data] of Object.entries(tokens)) {
+                    if (!(data.owner in owners)) {
+                      owners[data.owner] = [];
+                    }
+                    owners[data.owner].push(tokenId);
+                  }
+                  console.log("owners: " + JSON.stringify(owners, null, 2));
+                  Vue.set(this.collections[contract], 'owners', owners);
+
+                }
+                console.log("collections: " + JSON.stringify(this.collections, null, 2));
+              }
+
+
               if (action == "retrieveSecondaryCollection") {
                 console.log("retrieveSecondaryCollection");
                 let owners = [];
                 if (Object.keys(this.selectedMainTable).length > 0) {
                   owners = Object.keys(this.selectedMainTable);
                 } else {
-                  for (const record of this.filteredSortedMainTable.slice(0, 200)) {
+                  for (const record of this.filteredSortedMainTable) {
                     if (!(record.owner in this.secondaryData)) {
                       owners.push(record.owner);
                     }
@@ -509,10 +909,13 @@
                 this.sync.total = owners.count;
                 this.sync.section = "Secondary collection";
                 for (let owner of owners) {
-                  // console.log("Processing: " + owner);
+                  console.log("Processing: " + owner);
+                  Vue.set(this.secondaryData, owner, {});
                   let stop = false;
-                  for (let offset = 0; !stop; offset++) {
-                    let url = "https://api.reservoir.tools/users/" + owner + "/tokens/v5?sortBy=acquiredAt&sortDirection=desc&offset=" + (offset * 100) + "&limit=100&includeTopBid=false";
+                  const LIMIT = 100;
+                  const MAXLIMIT = 10000;
+                  for (let offset = 0; offset < MAXLIMIT && !stop; offset = parseInt(offset) + LIMIT) {
+                    let url = "https://api.reservoir.tools/users/" + owner + "/tokens/v5?sortBy=acquiredAt&sortDirection=desc&offset=" + offset + "&limit=" + LIMIT + "&includeTopBid=false";
                     console.log("url: " + url);
                     const data = await fetch(url)
                       .then(handleErrors)
@@ -529,9 +932,9 @@
 
                       for (const tokenData of data.tokens) {
                         // console.log(JSON.stringify(tokenData, null, 2));
-                        if (!(owner in this.secondaryData)) {
-                          Vue.set(this.secondaryData, owner, {});
-                        }
+                        // if (!(owner in this.secondaryData)) {
+                        //   Vue.set(this.secondaryData, owner, {});
+                        // }
                         const contract = tokenData.token.contract;
                         const tokenId = tokenData.token.tokenId;
                         const name = tokenData.token.name;
@@ -542,17 +945,17 @@
                           Vue.set(this.secondaryData[owner], contract, {
                             collectionName,
                             collectionImage,
-                            tokens: [ { tokenId, name, image } ],
+                            tokens: {},
                           });
-                        } else {
-                          this.secondaryData[owner][contract].tokens.push({ tokenId, name, image });
                         }
+                        Vue.set(this.secondaryData[owner][contract].tokens, tokenId, { tokenId, name, image });
                       }
                     } else {
                       stop = true;
                     }
-                    await delay(500); // TODO: Adjust to avoid error 429 Too Many Requests. Fails at 200ms
+                    await delay(750); // TODO: Adjust to avoid error 429 Too Many Requests. Fails at 200ms
                   }
+                  await delay(1000); // TODO: Adjust to avoid error 429 Too Many Requests. Fails at 200ms
 
                   this.sync.completed = parseInt(this.sync.completed) + 1;
                   if (this.sync.halt) {
@@ -578,6 +981,10 @@
           if ('coinbase' in localStorage) {
             this.coinbase = localStorage.coinbase;
           }
+          if ('selectedCollections' in localStorage) {
+            this.selectedCollections = JSON.parse(localStorage.selectedCollections);
+            console.log("mounted - selectedCollections: " + JSON.stringify(this.selectedCollections, null, 2));
+          }
           if ('selectedMainTable' in localStorage) {
             this.selectedMainTable = JSON.parse(localStorage.selectedMainTable);
           }
@@ -597,6 +1004,11 @@
           (async() => {
             const db0 = new Dexie(this.db.name);
             db0.version(this.db.version).stores(this.db.schemaDefinition);
+            const collections = await db0.cache.where("objectName").equals('collections').toArray();
+            if (collections.length == 1) {
+              this.collections = collections[0].object;
+              console.log("mounted - collections: " + JSON.stringify(this.collections, null, 2));
+            }
             const mainToken = await db0.cache.where("objectName").equals('mainToken').toArray();
             if (mainToken.length == 1) {
               this.mainToken = mainToken[0].object;
@@ -610,7 +1022,7 @@
             const secondaryData = await db0.cache.where("objectName").equals('secondaryData').toArray();
             if (secondaryData.length == 1) {
               this.secondaryData = secondaryData[0].object;
-              console.log("mounted - secondaryData: " + JSON.stringify(this.secondaryData, null, 2));
+              // console.log("mounted - secondaryData: " + JSON.stringify(this.secondaryData, null, 2));
             }
             db0.close();
           })();
