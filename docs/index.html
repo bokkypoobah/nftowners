@@ -230,7 +230,40 @@
               </div>
             </div>
             <!-- <b-table small fixed striped selectable responsive hover :fields="mainTableFields" :items="pagedFilteredSortedMainTable" show-empty empty-html="Enter ERC-721 NFT collection address in the top left input field and click Retrieve" head-variant="light" class="m-0 mt-1"> -->
-            <b-table small fixed striped selectable responsive hover :items="pagedFilteredSortedCrossTab" show-empty empty-html="Enter ERC-721 NFT collection address in the top left input field and click Retrieve" head-variant="light" class="m-0 mt-1">
+            <b-table small fixed striped selectable responsive hover :fields="crossTabFields" :items="pagedFilteredSortedCrossTab" show-empty empty-html="Enter ERC-721 NFT collection address in the top left input field and click Retrieve" head-variant="light" class="m-0 mt-1">
+              <template #cell(owner)="data">
+                {{ data.item.owner }}
+              </template>
+              <template #cell(c0)="data">
+                {{ data.item.c0 && data.item.c0.length || '' }}
+              </template>
+              <template #cell(c1)="data">
+                {{ data.item.c1 && data.item.c1.length || '' }}
+              </template>
+              <template #cell(c2)="data">
+                {{ data.item.c2 && data.item.c2.length || '' }}
+              </template>
+              <template #cell(c3)="data">
+                {{ data.item.c3 && data.item.c3.length || '' }}
+              </template>
+              <template #cell(c4)="data">
+                {{ data.item.c4 && data.item.c4.length || '' }}
+              </template>
+              <template #cell(c5)="data">
+                {{ data.item.c5 && data.item.c5.length || '' }}
+              </template>
+              <template #cell(c6)="data">
+                {{ data.item.c6 && data.item.c6.length || '' }}
+              </template>
+              <template #cell(c7)="data">
+                {{ data.item.c7 && data.item.c7.length || '' }}
+              </template>
+              <template #cell(c8)="data">
+                {{ data.item.c8 && data.item.c8.length || '' }}
+              </template>
+              <template #cell(c9)="data">
+                {{ data.item.c9 && data.item.c9.length || '' }}
+              </template>
             </b-table>
           </b-card>
 
@@ -476,6 +509,28 @@
           pagedFilteredSortedCollections() {
             return this.filteredSortedCollections.slice((this.settings.collections.currentPage - 1) * this.settings.collections.pageSize, this.settings.collections.currentPage * this.settings.collections.pageSize);
           },
+
+          // collectionsFields: [
+          //   { key: 'number', label: '#', sortable: false, thStyle: 'width: 5%;', tdClass: 'text-truncate' },
+          //   { key: 'collection', label: 'Collection', sortable: false, thStyle: 'width: 95%;', tdClass: 'text-truncate' },
+          // ],
+
+          crossTabFields() {
+            const order = [
+              "0x31385d3520bced94f77aae104b406994d8f2168c",
+              "0xb47e3cd837ddf8e4c57f05d70ab865de6e193bbb",
+              "0x282bdd42f4eb70e7a9d9f40c8fea0825b7f68c5d"
+            ];
+            const results = [];
+            results.push({ key: 'owner', label: 'Owner', tdClass: 'text-truncate' })
+            for (const contractIndex in order) {
+              const contract = order[contractIndex];
+              const collection = this.collections[contract];
+              results.push({ key: 'c' + contractIndex, label: collection.name, tdClass: 'text-truncate', image: collection.image })
+            }
+            return results;
+          },
+
           filteredCrossTab() {
             const order = [
               "0x31385d3520bced94f77aae104b406994d8f2168c",
