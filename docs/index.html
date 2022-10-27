@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Txs</title>
+    <title>NFT Owners</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
@@ -51,8 +51,8 @@
             <em v-b-popover.hover.bottom="'gm gm gm'">NFT Owners</em>
           </b-navbar-brand>
           <b-navbar-nav class="ml-auto">
-            <b-avatar v-if="coinbase && coinbase != ensOrAddress(coinbase)" rounded variant="light" size="2.0rem" :src="'https://metadata.ens.domains/mainnet/avatar/' + ensOrAddress(coinbase)" v-b-popover.hover="'Your ENS avatar if set'"></b-avatar>
-            <b-button size="sm" variant="primary" class="ml-1" @click="processIt('connect')" v-b-popover.hover.bottom="'Click to update wallet'">{{ coinbase ? ensOrAddress(coinbase, 32) : 'Connect' }}</b-button>
+            <!-- <b-avatar v-if="coinbase && coinbase != ensOrAddress(coinbase)" rounded variant="light" size="2.0rem" :src="'https://metadata.ens.domains/mainnet/avatar/' + ensOrAddress(coinbase)" v-b-popover.hover="'Your ENS avatar if set'"></b-avatar>
+            <b-button size="sm" variant="primary" class="ml-1" @click="processIt('connect')" v-b-popover.hover.bottom="'Click to update wallet'">{{ coinbase ? ensOrAddress(coinbase, 32) : 'Connect' }}</b-button> -->
           </b-navbar-nav>
         </b-navbar>
 
@@ -66,12 +66,18 @@
             </b-card-text>
           </b-card>
 
-          <b-card v-if="false" class="mx-1 mt-1 mb-1" body-class="m-1 p-0" header-class="m-0 p-2">
-            <template #header>
+          <b-card class="m-0 p-0 border-0" body-class="m-1 p-0" header-class="m-0 p-2">
+            <!-- <template #header>
               Addresses
-            </template>
+            </template> -->
             <div class="d-flex flex-wrap m-0 p-0">
               <div class="mt-0 pr-1">
+                <b-form-input type="text" size="sm" v-model.trim="settings.mainCollection" @change="settingsUpdated" debounce="600" v-b-popover.hover.top="'Main collection to start from'" placeholder="0x{NFT collection address}" style="min-width: 12.0rem;"></b-form-input>
+              </div>
+              <div class="mt-0 pr-1">
+                <b-button size="sm" :disabled="sync.section != null" @click="processIt('retrieveMainCollection')" variant="primary" v-b-popover.hover.top="'Retrieve main collection data'">Retrieve</b-button>
+              </div>
+              <!-- <div class="mt-0 pr-1">
                 <b-form-input type="text" size="sm" v-model.trim="settings.addressTable.searchAddresses" @change="settingsUpdated" debounce="600" v-b-popover.hover.top="'Filter by partial address, name'" placeholder="🔍 address"></b-form-input>
               </div>
               <div class="mt-0 pr-1">
@@ -79,28 +85,25 @@
               </div>
               <div class="mt-0 pr-1">
                 <b-form-select size="sm" v-model="settings.addressTable.addressMineFilter" @change="settingsUpdated" :options="addressMineFilters" v-b-popover.hover.top="'Filter for my addresses, or not'"></b-form-select>
-              </div>
+              </div> -->
               <div class="mt-0 flex-grow-1">
               </div>
-              <div class="mt-0 pr-1">
-                <b-button size="sm" :disabled="sync.section != null" @click="processIt('computeAddresses')" variant="link" v-b-popover.hover.top="'Perform computations on addresses'"><b-icon-caret-right-square shift-v="+1" font-scale="0.9"></b-icon-caret-right-square></b-button>
-              </div>
-              <div class="mt-0 flex-grow-1">
+              <!-- <div class="mt-0 flex-grow-1">
               </div>
               <div class="mt-0 pr-0">
                 <b-button size="sm" :pressed.sync="settings.addAddresses" @click="settingsUpdated" variant="link" v-b-popover.hover.top="'Add addresses, tx hashes, Etherscan API key'"><span v-if="settings.addAddresses"><b-icon-plus-square-fill shift-v="+1" font-scale="1.0"></b-icon-plus-square-fill></span><span v-else><b-icon-plus-square shift-v="+1" font-scale="1.0"></b-icon-plus-square></span></b-button>
               </div>
               <div class="mt-0 pr-1">
                 <b-button size="sm" :pressed.sync="settings.editAddresses" @click="settingsUpdated" :variant="settings.editAddresses ? 'danger' : 'link'" v-b-popover.hover.top="settings.editAddresses ? 'End editing address attributes' : 'Edit address attributes'"><b-icon-pencil shift-v="+1" font-scale="1.0"></b-icon-pencil></b-button>
-              </div>
-              <div class="mt-0 flex-grow-1">
-              </div>
-              <div class="mt-0 pr-1">
+              </div> -->
+              <!-- <div class="mt-0 flex-grow-1">
+              </div> -->
+              <!-- <div class="mt-0 pr-1">
                 <b-button size="sm" @click="exportAddresses" variant="link">Export</b-button>
-              </div>
-              <div class="mt-0 flex-grow-1">
-              </div>
-              <div class="mt-0 pr-1">
+              </div> -->
+              <!-- <div class="mt-0 flex-grow-1">
+              </div> -->
+              <!-- <div class="mt-0 pr-1">
                 <b-form-select size="sm" v-model="settings.addressTable.sortOption" @change="settingsUpdated" :options="addressesSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
               </div>
               <div class="mt-0 pr-1">
@@ -111,9 +114,9 @@
               </div>
               <div class="mt-0 pl-1">
                 <b-form-select size="sm" v-model="settings.addressTable.pageSize" @change="settingsUpdated" :options="pageSizes" v-b-popover.hover.top="'Addresses page size'"></b-form-select>
-              </div>
+              </div> -->
             </div>
-            <b-card v-if="settings.addAddresses" no-body no-header bg-variant="light" class="m-1 p-1">
+            <b-card v-if="false && settings.addAddresses" no-body no-header bg-variant="light" class="m-1 p-1">
               <b-card-body class="m-1 p-1">
                 <b-form-group label-cols-lg="2" label="Add Addresses" label-size="md" label-class="font-weight-bold pt-0" class="mb-0">
                   <b-form-group label="Addresses:" label-for="addaddresses-hashes" label-size="sm" label-cols-sm="2" label-align-sm="right" description="List of Ethereum addresses. These will be saved in your local browser storage and will be used in web3 and Etherscan API calls" class="mx-0 my-1 p-0">
@@ -141,7 +144,7 @@
 
               </b-card-body>
             </b-card>
-            <b-table small fixed striped selectable responsive hover :fields="addressesFields" :items="pagedFilteredSortedAddresses" show-empty empty-html="Click [+] above to add addresses and Ethereum transaction hashes, and set your Etherscan API key for imports. Click on your address on the top right to add it" head-variant="light" class="m-0 mt-1">
+            <b-table v-if="false" small fixed striped selectable responsive hover :fields="addressesFields" :items="pagedFilteredSortedAddresses" show-empty empty-html="Click [+] above to add addresses and Ethereum transaction hashes, and set your Etherscan API key for imports. Click on your address on the top right to add it" head-variant="light" class="m-0 mt-1">
               <template #head(number)="data">
                 <b-dropdown size="sm" variant="link" v-b-popover.hover="'Toggle selection'">
                   <template #button-content>
@@ -418,6 +421,7 @@
         data: {
           coinbase: null,
           settings: {
+            mainCollection: "0x31385d3520bCED94f77AaE104b406994D8F2168C", // TODO: null,
             showImport: false, // TODO: Delete
             addAddresses: false,
             editAddresses: false,
@@ -947,6 +951,62 @@
 
               const db0 = new Dexie(this.db.name);
               db0.version(this.db.version).stores(this.db.schemaDefinition);
+
+              if (action == "retrieveMainCollection") {
+                console.log("retrieveMainCollection");
+
+                let continuation = null;
+                this.sync.completed = 0;
+                this.sync.total = 0;
+                this.sync.section = "Main collection";
+                const mainTokens = {};
+                do {
+                  let url = "https://api.reservoir.tools/tokens/v5?contract=" + this.settings.mainCollection + "&limit=100" +
+                    (continuation != null ? "&continuation=" + continuation : '');
+                  console.log("url: " + url);
+                  const data = await fetch(url)
+                    // .then(handleErrors)
+                    .then(response => response.json())
+                    .catch(function(error) {
+                       console.log("ERROR - updateCollection: " + error);
+                       // state.sync.error = true;
+                       return [];
+                    });
+                  // continuation = data.continuation;
+                  if (data && data.tokens) {
+                    for (const tokenData of data.tokens) {
+                      const token = tokenData.token;
+                      console.log(JSON.stringify(token, null, 2));
+                      mainTokens[token.tokenId] = {
+                        owner: token.owner,
+                        image: token.image,
+                      };
+                    //   let price = null;
+                    //   let validUntil = null;
+                    //   let source = null;
+                    //   if (token.market.floorAsk.price) {
+                    //     price = token.market.floorAsk.price.amount.native;
+                    //     validUntil = token.market.floorAsk.validUntil;
+                    //     source = token.market.floorAsk.source.name;
+                    //   }
+                    //   prices[token.token.tokenId] = { price, validUntil, source, lastSell: token.token.lastSell, rarityRank: token.rarityRank };
+                    }
+                  }
+                  // this.sync.completed = Object.keys(prices).length;
+                } while (continuation != null /*&& !state.halt && !state.sync.error */);
+                console.log(JSON.stringify(mainTokens, null, 2));
+
+                const owners = {};
+                for (const [tokenId, data] of Object.entries(mainTokens)) {
+                  console.log(tokenId + " " + JSON.stringify(data));
+                  if (!(data.owner in owners)) {
+                    owners[data.owner] = [];
+                  }
+                  owners[data.owner].push(tokenId);
+                }
+                console.log(JSON.stringify(owners, null, 2));
+
+              }
 
               // TODO
               if (false && action == "importFromEtherscan") {
