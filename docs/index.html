@@ -153,6 +153,9 @@
 
               </b-card-body>
             </b-card>
+            <b-table small fixed striped selectable responsive hover :items="pagedFilteredSortedMainTable" show-empty empty-html="Enter ERC-721 NFT collection address in the top left input field and click Retrieve" head-variant="light" class="m-0 mt-1">
+            </b-table>
+
             <b-table v-if="false" small fixed striped selectable responsive hover :fields="addressesFields" :items="pagedFilteredSortedAddresses" show-empty empty-html="Click [+] above to add addresses and Ethereum transaction hashes, and set your Etherscan API key for imports. Click on your address on the top right to add it" head-variant="light" class="m-0 mt-1">
               <template #head(number)="data">
                 <b-dropdown size="sm" variant="link" v-b-popover.hover="'Toggle selection'">
@@ -772,6 +775,19 @@
           },
           pagedFilteredSortedTxs() {
             return this.filteredSortedTxs.slice((this.settings.txs.currentPage - 1) * this.settings.txs.pageSize, this.settings.txs.currentPage * this.settings.txs.pageSize);
+          },
+          filteredMainTable() {
+            const results = [];
+
+            // results.push({ aaa: 123 });
+
+            return results;
+          },
+          filteredSortedMainTable() {
+            return this.filteredMainTable;
+          },
+          pagedFilteredSortedMainTable() {
+            return this.filteredSortedMainTable.slice((this.settings.mainTable.currentPage - 1) * this.settings.mainTable.pageSize, this.settings.mainTable.currentPage * this.settings.mainTable.pageSize);
           },
         },
 
