@@ -113,7 +113,7 @@
               <!-- <div class="mt-0 flex-grow-1">
               </div> -->
               <div class="mt-0 pr-1">
-                <b-form-select size="sm" v-model="settings.mainTable.sortOption" @change="settingsUpdated" :options="settings.mainTable.sortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
+                <b-form-select size="sm" v-model="settings.mainTable.sortOption" @change="settingsUpdated" :options="mainTableSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
               </div>
               <div class="mt-0 pr-1">
                 <font size="-2" v-b-popover.hover.top="'# txs'">{{ filteredSortedMainTable.length }}</font>
@@ -153,6 +153,7 @@
 
               </b-card-body>
             </b-card>
+
             <b-table small fixed striped selectable responsive hover :items="pagedFilteredSortedMainTable" show-empty empty-html="Enter ERC-721 NFT collection address in the top left input field and click Retrieve" head-variant="light" class="m-0 mt-1">
             </b-table>
 
@@ -443,10 +444,6 @@
               currentPage: 1,
               pageSize: 10,
               sortOption: 'countdsc',
-              sortOptions: [
-                { value: 'countasc', text: '▲ Token Count' },
-                { value: 'countdsc', text: '▼ Token Count' },
-              ],
             },
             addressTable: {
               searchAddresses: null,
@@ -494,6 +491,11 @@
           ensMap: {},
           selectedAddresses: {},
           selectedTxs: {},
+
+          mainTableSortOptions: [
+            { value: 'countasc', text: '▲ Token Count' },
+            { value: 'countdsc', text: '▼ Token Count' },
+          ],
 
           addressesSortOptions: [
             { value: 'addressasc', text: '▲ Address' },
