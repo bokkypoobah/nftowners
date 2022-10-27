@@ -1168,6 +1168,19 @@
                 this.sync.section = null;
               }
 
+              if (action == "retrieveSecondaryCollection") {
+                console.log("retrieveSecondaryCollection");
+                let owners = [];
+                if (Object.keys(this.selectedMainTable).length > 0) {
+                  owners = Object.keys(this.selectedMainTable);
+                } else {
+                  owners = Object.keys(this.filteredSortedMainTable);
+                }
+                console.log("owners: " + JSON.stringify(owners));
+
+              }
+
+
               // TODO
               if (false && action == "importFromEtherscan") {
                 const address = parameters;
