@@ -146,9 +146,13 @@
                 {{ ensOrAddress(data.item.owner) }}
               </template>
               <template #cell(collections)="data">
-                <!-- {{ mainToken.collection.name + ' x ' + data.item.count }} -->
                 <b-avatar rounded :badge="data.item.count.toString()" variant="light" size="3.0rem" :src="mainToken.collection.image" v-b-popover.hover="mainToken.collection.name + ' x ' + data.item.count">
                 </b-avatar>
+                +
+                <span v-for="(collection, collectionIndex) in getSecondaryCollectionsForOwner(data.item.owner)" :key="collectionIndex">
+                  <b-avatar rounded :badge="collection.count.toString()" variant="light" size="3.0rem" :src="collection.collectionImage" v-b-popover.hover="collection.collectionName + ' x ' + collection.count">
+                  </b-avatar>
+                </span>
               </template>
             </b-table>
           </b-card>
@@ -256,6 +260,19 @@
 
         // --- METHODS ---
         methods: {
+          getSecondaryCollectionsForOwner(owner) {
+            const results = [];
+            if (owner in this.secondaryData) {
+              const mainContract = this.settings.mainCollection.toLowerCase();
+              for (const [contract, item] of Object.entries(this.secondaryData[owner])) {
+                if (contract != mainContract) {
+                  results.push({ contract, collectionName: item.collectionName, collectionImage: item.collectionImage, count: item.tokens.length });
+                }
+              }
+              results.sort((a, b) => b.count - a.count);
+            }
+            return results;
+          },
           async halt() {
             this.sync.halt = true;
             console.log("this.sync.halt: " + this.sync.halt);
