@@ -112,18 +112,18 @@
               </div> -->
               <!-- <div class="mt-0 flex-grow-1">
               </div> -->
+              <div class="mt-0 pr-1">
+                <b-form-select size="sm" v-model="settings.mainTable.sortOption" @change="settingsUpdated" :options="settings.mainTable.sortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
+              </div>
               <!-- <div class="mt-0 pr-1">
-                <b-form-select size="sm" v-model="settings.addressTable.sortOption" @change="settingsUpdated" :options="addressesSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
-              </div>
-              <div class="mt-0 pr-1">
                 <font size="-2" v-b-popover.hover.top="'# txs'">{{ filteredSortedAddresses.length }}</font>
-              </div>
-              <div class="mt-0 pr-1">
-                <b-pagination size="sm" v-model="settings.addressTable.currentPage" @input="settingsUpdated" :total-rows="filteredSortedAddresses.length" :per-page="settings.addressTable.pageSize" style="height: 0;"></b-pagination>
-              </div>
-              <div class="mt-0 pl-1">
-                <b-form-select size="sm" v-model="settings.addressTable.pageSize" @change="settingsUpdated" :options="pageSizes" v-b-popover.hover.top="'Addresses page size'"></b-form-select>
               </div> -->
+              <!-- <div class="mt-0 pr-1">
+                <b-pagination size="sm" v-model="settings.mainTable.currentPage" @input="settingsUpdated" :total-rows="filteredSortedAddresses.length" :per-page="settings.mainTable.pageSize" style="height: 0;"></b-pagination>
+              </div> -->
+              <div class="mt-0 pl-1">
+                <b-form-select size="sm" v-model="settings.mainTable.pageSize" @change="settingsUpdated" :options="pageSizes" v-b-popover.hover.top="'Addresses page size'"></b-form-select>
+              </div>
             </div>
             <b-card v-if="false && settings.addAddresses" no-body no-header bg-variant="light" class="m-1 p-1">
               <b-card-body class="m-1 p-1">
@@ -435,6 +435,16 @@
             addAddresses: false,
             editAddresses: false,
             etherscanAPIKey: null,
+            mainTable: {
+              filter: null,
+              currentPage: 1,
+              pageSize: 10,
+              sortOption: 'countdsc',
+              sortOptions: [
+                { value: 'countasc', text: '▲ Token Count' },
+                { value: 'countdsc', text: '▼ Token Count' },
+              ],
+            },
             addressTable: {
               searchAddresses: null,
               addressTypeFilter: null,
