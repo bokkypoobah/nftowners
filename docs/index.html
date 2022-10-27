@@ -75,7 +75,10 @@
                 <b-form-input type="text" size="sm" v-model.trim="settings.mainCollection" @change="settingsUpdated" debounce="600" v-b-popover.hover.top="'Main collection to start from'" placeholder="0x{NFT collection address}" style="min-width: 12.0rem;"></b-form-input>
               </div>
               <div class="mt-0 pr-1">
-                <b-button size="sm" :disabled="sync.section != null" @click="processIt('retrieveMainCollection')" variant="primary" v-b-popover.hover.top="'Retrieve main collection data'">Retrieve</b-button>
+                <b-button size="sm" :disabled="sync.section != null" @click="processIt('retrieveMainCollection')" variant="primary" v-b-popover.hover.top="'Retrieve main collection data'">Retrieve Main</b-button>
+              </div>
+              <div class="mt-0 pr-1">
+                <b-button size="sm" :disabled="sync.section != null" @click="processIt('retrieveSecondaryCollection')" variant="primary" v-b-popover.hover.top="'Retrieve secondary collection data'">Retrieve Secondary</b-button>
               </div>
               <!-- <div class="mt-0 pr-1">
                 <b-form-input type="text" size="sm" v-model.trim="settings.addressTable.searchAddresses" @change="settingsUpdated" debounce="600" v-b-popover.hover.top="'Filter by partial address, name'" placeholder="🔍 address"></b-form-input>
@@ -125,7 +128,7 @@
                 <b-form-select size="sm" v-model="settings.mainTable.pageSize" @change="settingsUpdated" :options="pageSizes" v-b-popover.hover.top="'Addresses page size'"></b-form-select>
               </div>
             </div>
-            <b-card v-if="false && settings.addAddresses" no-body no-header bg-variant="light" class="m-1 p-1">
+            <!-- <b-card v-if="false && settings.addAddresses" no-body no-header bg-variant="light" class="m-1 p-1">
               <b-card-body class="m-1 p-1">
                 <b-form-group label-cols-lg="2" label="Add Addresses" label-size="md" label-class="font-weight-bold pt-0" class="mb-0">
                   <b-form-group label="Addresses:" label-for="addaddresses-hashes" label-size="sm" label-cols-sm="2" label-align-sm="right" description="List of Ethereum addresses. These will be saved in your local browser storage and will be used in web3 and Etherscan API calls" class="mx-0 my-1 p-0">
@@ -152,7 +155,7 @@
                 </b-form-group>
 
               </b-card-body>
-            </b-card>
+            </b-card> -->
 
             <b-table small fixed striped selectable responsive hover :fields="mainTableFields" :items="pagedFilteredSortedMainTable" show-empty empty-html="Enter ERC-721 NFT collection address in the top left input field and click Retrieve" head-variant="light" class="m-0 mt-1">
               <template #head(number)="data">
@@ -175,7 +178,7 @@
               </template>
               <template #cell(collections)="data">
                 <!-- {{ mainToken.collection.name + ' x ' + data.item.count }} -->
-                <b-avatar rounded :badge="data.item.count" variant="light" size="3.0rem" :src="mainToken.collection.image" v-b-popover.hover="mainToken.collection.name">
+                <b-avatar rounded :badge="data.item.count.toString()" variant="light" size="3.0rem" :src="mainToken.collection.image" v-b-popover.hover="mainToken.collection.name + ' x ' + data.item.count">
                 </b-avatar>
               </template>
             </b-table>
