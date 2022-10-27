@@ -82,12 +82,6 @@
               </div>
               <!-- <div class="mt-0 pr-1">
                 <b-form-input type="text" size="sm" v-model.trim="settings.addressTable.searchAddresses" @change="settingsUpdated" debounce="600" v-b-popover.hover.top="'Filter by partial address, name'" placeholder="🔍 address"></b-form-input>
-              </div>
-              <div class="mt-0 pr-1">
-                <b-form-select size="sm" v-model="settings.addressTable.addressTypeFilter" @change="settingsUpdated" :options="addressTypeFilters" v-b-popover.hover.top="'Filter by address types'"></b-form-select>
-              </div>
-              <div class="mt-0 pr-1">
-                <b-form-select size="sm" v-model="settings.addressTable.addressMineFilter" @change="settingsUpdated" :options="addressMineFilters" v-b-popover.hover.top="'Filter for my addresses, or not'"></b-form-select>
               </div> -->
               <div class="mt-0 flex-grow-1">
               </div>
@@ -175,45 +169,23 @@
           coinbase: null,
           settings: {
             mainCollection: "0x31385d3520bCED94f77AaE104b406994D8F2168C", // TODO: null,
-            showImport: false, // TODO: Delete
-            addAddresses: false,
-            editAddresses: false,
-            etherscanAPIKey: null,
+            // showImport: false, // TODO: Delete
+            // addAddresses: false,
+            // editAddresses: false,
+            // etherscanAPIKey: null,
             mainTable: {
               filter: null,
               currentPage: 1,
               pageSize: 10,
               sortOption: 'countdsc',
             },
-            addressTable: {
-              searchAddresses: null,
-              addressTypeFilter: null,
-              addressMineFilter: null,
-              showDetails: {},
-              currentPage: 1,
-              pageSize: 10,
-              sortOption: 'addressasc',
-            },
-            txs: {
-              searchTxs: null,
-              period: null,
-              showDetails: {},
-              currentPage: 1,
-              pageSize: 100,
-              sortOption: 'timeasc',
-            },
           },
-          addressesToAdd: null,
-          hashesToImport: null,
           sync: {
             section: null,
             total: null,
             completed: null,
             halt: false,
           },
-          addresses: {},
-          txHashes: {},
-          importData: {},
 
           mainToken: {
             tokens: {},
@@ -229,29 +201,9 @@
           ensMap: {},
           selectedMainTable: {},
 
-          selectedAddresses: {},
-          selectedTxs: {},
-
           mainTableSortOptions: [
             { value: 'countasc', text: '▲ Token Count' },
             { value: 'countdsc', text: '▼ Token Count' },
-          ],
-
-          addressesSortOptions: [
-            { value: 'addressasc', text: '▲ Address' },
-            { value: 'addressdsc', text: '▼ Address' },
-            { value: 'groupasc', text: '▲ Group, ▲ Name' },
-            { value: 'groupdsc', text: '▼ Group, ▲ Name' },
-            { value: 'nameasc', text: '▲ Name, ▲ Group' },
-            { value: 'namedsc', text: '▼ Name, ▲ Group' },
-          ],
-          txsSortOptions: [
-            { value: 'timeasc', text: '▲ Time' },
-            { value: 'timedsc', text: '▼ Time' },
-            { value: 'fromasc', text: '▲ From' },
-            { value: 'fromdsc', text: '▼ From' },
-            { value: 'toasc', text: '▲ To' },
-            { value: 'todsc', text: '▼ To' },
           ],
           pageSizes: [
             { value: 5, text: '5' },
@@ -264,28 +216,6 @@
             { value: 2500, text: '2.5k' },
             { value: 10000, text: '10k' },
           ],
-          addressTypes: [
-            { value: null, text: '(unknown)' },
-            { value: 'eoa', text: 'EOA' },
-            { value: 'contract', text: 'Contract' },
-            { value: 'erc721', text: 'ERC-721' },
-            { value: 'erc1155', text: 'ERC-1155' },
-            { value: 'erc20', text: 'ERC-20' },
-          ],
-          addressTypeFilters: [
-            { value: null, text: '(all)' },
-            { value: 'eoa', text: 'EOA' },
-            { value: 'contract', text: 'Contract' },
-            { value: 'erc721', text: 'ERC-721' },
-            { value: 'erc1155', text: 'ERC-1155' },
-            { value: 'erc20', text: 'ERC-20' },
-            { value: 'unknown', text: '(unknown)' },
-          ],
-          addressMineFilters: [
-            { value: null, text: '(any)' },
-            { value: 'mine', text: 'Mine' },
-            { value: 'notmine', text: 'Not Mine' },
-          ],
           mainTableFields: [
             { key: 'number', label: '#', sortable: false, thStyle: 'width: 5%;', tdClass: 'text-truncate' },
             { key: 'owner', label: 'Owner', sortable: false, thStyle: 'width: 30%;', tdClass: 'text-truncate' },
@@ -297,27 +227,6 @@
             // { key: 'name', label: 'Name', sortable: false, thStyle: 'width: 15%;', tdClass: 'text-truncate' },
             // { key: 'notes', label: 'Notes', sortable: false, thStyle: 'width: 10%;', tdClass: 'text-truncate' },
             // { key: 'end', label: '', sortable: false, thStyle: 'width: 10%;', thClass: 'text-right', tdClass: 'text-right' },
-          ],
-          addressesFields: [
-            { key: 'number', label: '#', sortable: false, thStyle: 'width: 5%;', tdClass: 'text-truncate' },
-            { key: 'address', label: 'Address / ENS Name', sortable: false, thStyle: 'width: 30%;', tdClass: 'text-truncate' },
-            { key: 'type', label: 'Type', sortable: false, thStyle: 'width: 10%;', tdClass: 'text-truncate' },
-            { key: 'mine', label: 'Mine', sortable: false, thStyle: 'width: 10%;', tdClass: 'text-truncate' },
-            // { key: 'ens', label: 'ENS', sortable: false, thStyle: 'width: 10%;', tdClass: 'text-truncate' },
-            { key: 'group', label: 'Group', sortable: false, thStyle: 'width: 10%;', tdClass: 'text-truncate' },
-            { key: 'name', label: 'Name', sortable: false, thStyle: 'width: 15%;', tdClass: 'text-truncate' },
-            { key: 'notes', label: 'Notes', sortable: false, thStyle: 'width: 10%;', tdClass: 'text-truncate' },
-            { key: 'end', label: '', sortable: false, thStyle: 'width: 10%;', thClass: 'text-right', tdClass: 'text-right' },
-          ],
-          txsFields: [
-            { key: 'number', label: '#', thStyle: 'width: 5%;', tdClass: 'text-truncate' },
-            { key: 'timestamp', label: 'Timestamp', thStyle: 'width: 15%;', tdClass: 'text-truncate' },
-            { key: 'from', label: 'From', thStyle: 'width: 15%;', tdClass: 'text-truncate' },
-            { key: 'to', label: 'To', thStyle: 'width: 15%;', tdClass: 'text-truncate' },
-            { key: 'blah', label: 'Blah', thStyle: 'width: 20%;', tdClass: 'text-truncate' },
-            { key: 'txHash', label: 'Transactions', thStyle: 'width: 15%;', tdClass: 'text-truncate' },
-            { key: 'balance', label: 'Balance', /*sortable: true,*/ thStyle: 'width: 10%;', thClass: 'text-right', tdClass: 'text-right' },
-            { key: 'end', label: '', sortable: false, thStyle: 'width: 5%;', thClass: 'text-right', tdClass: 'text-right' },
           ],
           db: {
             name: "nftowner089",
@@ -332,204 +241,6 @@
 
         // --- COMPUTED ---
         computed: {
-          txsPeriodOptions() {
-            const results = [];
-            results.push({ value: null, text: "(select period)", data: null });
-            const startMonth = "Jul";
-            const now = moment();
-            let currentStartPeriod = moment(now).month(startMonth).startOf('month');
-            if (currentStartPeriod > now) {
-              currentStartPeriod = currentStartPeriod.subtract(1, 'year');
-            }
-            for (let year = 0; year < 7; year++) {
-              const startPeriod = moment(currentStartPeriod).subtract(year, 'year');
-              const endPeriod = moment(startPeriod).add(1, 'year').subtract(1, 'second');
-              results.push({ value: "fym" + year, text: startPeriod.format('MMM DD YYYY') + " to " + endPeriod.format('MMM DD YYYY'), data: { startPeriod, endPeriod } });
-            }
-            results.push({ value: "nodata", text: "(tx hashes with no data)", data: null });
-            return results;
-          },
-          filteredAddresses() {
-            const results = [];
-            const searchAddressesLower = this.settings.addressTable.searchAddresses && this.settings.addressTable.searchAddresses.toLowerCase() || null;
-            for (const [address, item] of Object.entries(this.addresses)) {
-              const ensName = this.ensMap[address] || null;
-              let include = searchAddressesLower == null ||
-                (item.name && item.name.toLowerCase().includes(searchAddressesLower)) ||
-                (item.group && item.group.toLowerCase().includes(searchAddressesLower)) ||
-                (item.address && item.address.toLowerCase().includes(searchAddressesLower)) ||
-                (item.notes && item.notes.toLowerCase().includes(searchAddressesLower) ||
-                (ensName != null && ensName.toLowerCase().includes(searchAddressesLower)));
-              if (include && this.settings.addressTable.addressMineFilter != null) {
-                if (this.settings.addressTable.addressMineFilter == 'mine' && item.mine) {
-                } else if (this.settings.addressTable.addressMineFilter == 'notmine' && !item.mine) {
-                } else {
-                  include = false;
-                }
-              }
-              if (include && this.settings.addressTable.addressTypeFilter != null) {
-                if (this.settings.addressTable.addressTypeFilter == 'unknown' && item.type == null) {
-                } else if (this.settings.addressTable.addressTypeFilter == item.type) {
-                } else {
-                  include = false;
-                }
-              }
-              if (include) {
-                results.push({
-                  address,
-                  type: item.type,
-                  mine: item.mine,
-                  ensName: item.ensName,
-                  group: item.group,
-                  name: item.name,
-                  tags: item.tags,
-                  notes: item.notes,
-                  _showDetails: this.settings.addressTable.showDetails[address] || false,
-                });
-              }
-            }
-            return results;
-          },
-          filteredSortedAddresses() {
-            let results = this.filteredAddresses;
-            if (this.settings.addressTable.sortOption == 'addressasc') {
-              results.sort((a, b) => {
-                return ('' + a.address).localeCompare(b.address);
-              });
-            } else if (this.settings.addressTable.sortOption == 'addressdsc') {
-              results.sort((a, b) => {
-                return ('' + b.address).localeCompare(a.address);
-              });
-            } else if (this.settings.addressTable.sortOption == 'groupasc') {
-              results.sort((a, b) => {
-                if (('' + a.group).localeCompare(b.group) == 0) {
-                  if (('' + a.name).localeCompare(b.name) == 0) {
-                    return ('' + a.address).localeCompare(b.address);
-                  } else {
-                    return ('' + a.name).localeCompare(b.name);
-                  }
-                } else {
-                  return ('' + a.group).localeCompare(b.group);
-                }
-              });
-            } else if (this.settings.addressTable.sortOption == 'groupdsc') {
-              results.sort((a, b) => {
-                if (('' + a.group).localeCompare(b.group) == 0) {
-                  if (('' + a.name).localeCompare(b.name) == 0) {
-                    return ('' + a.address).localeCompare(b.address);
-                  } else {
-                    return ('' + a.name).localeCompare(b.name);
-                  }
-                } else {
-                  return ('' + b.group).localeCompare(a.group);
-                }
-              });
-            } else if (this.settings.addressTable.sortOption == 'nameasc') {
-              results.sort((a, b) => {
-                if (('' + a.name).localeCompare(b.name) == 0) {
-                  if (('' + a.group).localeCompare(b.group) == 0) {
-                    return ('' + a.address).localeCompare(b.address);
-                  } else {
-                    return ('' + a.group).localeCompare(b.group);
-                  }
-                } else {
-                  return ('' + a.name).localeCompare(b.name);
-                }
-              });
-            } else if (this.settings.addressTable.sortOption == 'namedsc') {
-              results.sort((a, b) => {
-                if (('' + a.name).localeCompare(b.name) == 0) {
-                  if (('' + a.group).localeCompare(b.group) == 0) {
-                    return ('' + a.address).localeCompare(b.address);
-                  } else {
-                    return ('' + a.group).localeCompare(b.group);
-                  }
-                } else {
-                  return ('' + b.name).localeCompare(a.name);
-                }
-              });
-            }
-            return results;
-          },
-          pagedFilteredSortedAddresses() {
-            return this.filteredSortedAddresses.slice((this.settings.addressTable.currentPage - 1) * this.settings.addressTable.pageSize, this.settings.addressTable.currentPage * this.settings.addressTable.pageSize);
-          },
-          filteredTxs() {
-            const results = [];
-            let startPeriod = null;
-            let endPeriod = null;
-            const searchTxsLower = this.settings.txs.searchTxs && this.settings.txs.searchTxs.toLowerCase() || null;
-            if (this.settings.txs.period != null && this.settings.txs.period != "nodata") {
-              const periodRecords = this.txsPeriodOptions.filter(e => e.value == this.settings.txs.period);
-              startPeriod = periodRecords[0].data.startPeriod;
-              endPeriod = periodRecords[0].data.endPeriod;
-            }
-            let i = 0;
-            const hasAddressesFilter = Object.keys(this.selectedAddresses).length > 0;
-            for (const [k, v] of Object.entries(this.txHashes)) {
-              let include = true;
-              if (this.settings.txs.period == "nodata") {
-                if (v.timestamp != null) {
-                  include = false;
-                }
-              } else {
-                if (startPeriod != null && v.timestamp < startPeriod.unix()) {
-                  include = false;
-                }
-                if (include && endPeriod != null && v.timestamp > endPeriod.unix()) {
-                  include = false;
-                }
-                if (include && hasAddressesFilter) {
-                  if (!this.selectedAddresses[v.data.tx.from] && !(v.data.tx.to && this.selectedAddresses[v.data.tx.to])) {
-                    include = false;
-                  }
-                }
-                if (include && searchTxsLower != null) {
-                  // console.log("searchTxsLower: " + searchTxsLower + " vs " + v.data.tx.from + " check " + v.data.tx.from.toLowerCase().includes(searchTxsLower));
-                  if (
-                    !(v.txHash.includes(searchTxsLower)) &&
-                    !(v.data.tx.from.toLowerCase().includes(searchTxsLower)) &&
-                    !(v.data.tx.to && v.data.tx.to.toLowerCase().includes(searchTxsLower))
-                  ) {
-                    include = false;
-                  }
-                }
-              }
-              if (include) {
-                results.push({
-                  txHash: k,
-                  timestamp: v.timestamp,
-                  from: v.data.tx && v.data.tx.from || null,
-                  to: v.data.tx && v.data.tx.to || null,
-                  ethBalance: v.data.ethBalance || null,
-                  ethBalancePreviousBlock: v.data.ethBalancePreviousBlock || null,
-                  _showDetails: this.settings.txs.showDetails[k] || false,
-                });
-              }
-              i++;
-            }
-            return results;
-          },
-          filteredSortedTxs() {
-            let results = this.filteredTxs;
-            if (this.settings.txs.sortOption == 'timeasc') {
-              results.sort((a, b) => a.timestamp - b.timestamp);
-            } else if (this.settings.txs.sortOption == 'timedsc') {
-              results.sort((a, b) => b.timestamp - a.timestamp);
-            } else if (this.settings.txs.sortOption == 'fromasc') {
-              results.sort((a, b) => ('' + a.from.toString()).localeCompare(b.from.toString()))
-            } else if (this.settings.txs.sortOption == 'fromdsc') {
-              results.sort((a, b) => ('' + b.from.toString()).localeCompare(a.from.toString()))
-            } else if (this.settings.txs.sortOption == 'toasc') {
-              results.sort((a, b) => ('' + (a.to && a.to.toString() || '')).localeCompare((b.to && b.to.toString() || '')))
-            } else if (this.settings.txs.sortOption == 'todsc') {
-              results.sort((a, b) => ('' + (b.to && b.to.toString() || '')).localeCompare((a.to && a.to.toString() || '')))
-            }
-            return results;
-          },
-          pagedFilteredSortedTxs() {
-            return this.filteredSortedTxs.slice((this.settings.txs.currentPage - 1) * this.settings.txs.pageSize, this.settings.txs.currentPage * this.settings.txs.pageSize);
-          },
           filteredMainTable() {
             const results = [];
             for (const [owner, data] of Object.entries(this.mainToken.owners)) {
@@ -594,29 +305,6 @@
             }
             return address == null ? null : (length == 0 ? address : address.substring(0, length));
           },
-          toggleSelectedAddresses(items) {
-            let someFalse = false;
-            let someTrue = false;
-            for (const item of items) {
-              if (this.selectedAddresses[item.address]) {
-                someTrue = true;
-              } else {
-                someFalse = true;
-              }
-            }
-            for (const item of items) {
-              if (!(someTrue && !someFalse)) {
-                Vue.set(this.selectedAddresses, item.address, true);
-              } else {
-                Vue.delete(this.selectedAddresses, item.address);
-              }
-            }
-            localStorage.selectedAddresses = JSON.stringify(this.selectedAddresses);
-          },
-          clearSelectedAddresses() {
-            this.selectedAddresses = {};
-            localStorage.selectedAddresses = JSON.stringify(this.selectedAddresses);
-          },
           toggleSelectedMainTable(items) {
             let someFalse = false;
             let someTrue = false;
@@ -639,64 +327,6 @@
           clearSelectedMainTable() {
             this.selectedMainTable = {};
             localStorage.selectedMainTable = JSON.stringify(this.selectedMainTable);
-          },
-          async toggleAddressMine(address) {
-            if (!this.addresses[address].mine) {
-              Vue.set(this.addresses[address], 'mine', true);
-            } else {
-              Vue.set(this.addresses[address], 'mine', false);
-            }
-            // console.log("toggleAddressMine: " + JSON.stringify(this.addresses, null, 2));
-            const db0 = new Dexie(this.db.name);
-            db0.version(this.db.version).stores(this.db.schemaDefinition);
-            await db0.cache.put({ objectName: 'addresses', object: this.addresses }).then (function() {
-            }).catch(function(error) {
-              console.log("error: " + error);
-            });
-            db0.close();
-          },
-          toggleAddressDetails(data) {
-            // console.log("toggleAddressDetails: " + JSON.stringify(data, null, 2));
-            const currentState = this.settings.addressTable.showDetails[data.item.address] || false;
-            if (!currentState) {
-              Vue.set(this.settings.addressTable.showDetails, data.item.address, !currentState);
-            } else {
-              Vue.delete(this.settings.addressTable.showDetails, data.item.address);
-            }
-            this.settingsUpdated();
-          },
-          toggleSelectedTxs(txItems) {
-            let someFalse = false;
-            let someTrue = false;
-            for (const item of txItems) {
-              if (this.selectedTxs[item.txHash]) {
-                someTrue = true;
-              } else {
-                someFalse = true;
-              }
-            }
-            for (const item of txItems) {
-              if (!(someTrue && !someFalse)) {
-                Vue.set(this.selectedTxs, item.txHash, true);
-              } else {
-                Vue.delete(this.selectedTxs, item.txHash);
-              }
-            }
-            localStorage.selectedTxs = JSON.stringify(this.selectedTxs);
-          },
-          clearSelectedTxs() {
-            this.selectedTxs = {};
-            localStorage.selectedTxs = JSON.stringify(this.selectedTxs);
-          },
-          toggleTxsDetails(data) {
-            console.log("toggleTxsDetails: " + JSON.stringify(data, null, 2));
-            const currentState = this.settings.txs.showDetails[data.item.txHash] || false;
-            if (!currentState) {
-              Vue.set(this.settings.txs.showDetails, data.item.txHash, !currentState);
-            } else {
-              Vue.delete(this.settings.txs.showDetails, data.item.txHash);
-            }
-            this.settingsUpdated();
           },
           settingsUpdated() {
             console.log("settingsUpdated: " + JSON.stringify(this.settings, null, 2));
@@ -1075,12 +705,6 @@
           if ('selectedMainTable' in localStorage) {
             this.selectedMainTable = JSON.parse(localStorage.selectedMainTable);
           }
-          // if ('selectedAddresses' in localStorage) {
-          //   this.selectedAddresses = JSON.parse(localStorage.selectedAddresses);
-          // }
-          // if ('selectedTxs' in localStorage) {
-          //   this.selectedTxs = JSON.parse(localStorage.selectedTxs);
-          // }
           // if ('settings' in localStorage) {
           //   // console.log("mounted - before - this.settings: " + JSON.stringify(this.settings, null, 2));
           //   // console.log("mounted - before - localStorage.settings: " + localStorage.settings);
