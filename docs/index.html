@@ -131,34 +131,6 @@
                 <b-form-select size="sm" v-model="settings.mainTable.pageSize" @change="settingsUpdated" :options="pageSizes" v-b-popover.hover.top="'Addresses page size'"></b-form-select>
               </div>
             </div>
-            <!-- <b-card v-if="false && settings.addAddresses" no-body no-header bg-variant="light" class="m-1 p-1">
-              <b-card-body class="m-1 p-1">
-                <b-form-group label-cols-lg="2" label="Add Addresses" label-size="md" label-class="font-weight-bold pt-0" class="mb-0">
-                  <b-form-group label="Addresses:" label-for="addaddresses-hashes" label-size="sm" label-cols-sm="2" label-align-sm="right" description="List of Ethereum addresses. These will be saved in your local browser storage and will be used in web3 and Etherscan API calls" class="mx-0 my-1 p-0">
-                    <b-form-textarea size="sm" id="addaddresses-hashes" v-model.trim="addressesToAdd" rows="1" max-rows="5" class="w-75"  placeholder="0x1234... 0x2345..., 0xAbCd..."></b-form-textarea>
-                  </b-form-group>
-                  <b-form-group label="" label-for="addaddresses-submit" label-size="sm" label-cols-sm="2" label-cols-sm="2" label-align-sm="right" description="Valid addresses will be added below. Click the + to the right to show details and click Import" class="mx-0 my-1 p-0">
-                    <b-button size="sm" id="addaddresses-submit" :disabled="addressesToAdd == null || addressesToAdd.length == 0" @click="processIt('addAddresses')" variant="primary">Add</b-button>
-                  </b-form-group>
-                </b-form-group>
-
-                <b-form-group label-cols-lg="2" label="Add Transaction Hashes" label-size="md" label-class="font-weight-bold pt-0" class="mt-3 mb-0">
-                  <b-form-group label="Hashes:" label-for="importhashes-hashes" label-size="sm" label-cols-sm="2" label-align-sm="right" description="Export from Etherscan.io and paste in the column of Ethereum tx hashes" class="mx-0 my-1 p-0">
-                    <b-form-textarea size="sm" id="importhashes-hashes" v-model.trim="hashesToImport" rows="1" max-rows="5" class="w-75"></b-form-textarea>
-                  </b-form-group>
-                  <b-form-group label="" label-for="importhashes-submit" label-size="sm" label-cols-sm="2" label-align-sm="right" description="These will be saved into your local browser storage. The computation processes will retrieve further details via your web3 connection" class="mx-0 my-1 p-0">
-                    <b-button size="sm" id="importhashes-submit" :disabled="hashesToImport == null || hashesToImport.length == 0" @click="processIt('importHashes')" variant="primary">Add</b-button>
-                  </b-form-group>
-                </b-form-group>
-
-                <b-form-group label-cols-lg="2" label="Import Settings" label-size="md" label-class="font-weight-bold pt-0" class="mt-3 mb-0">
-                  <b-form-group label="Etherscan API Key:" label-for="etherscan-apikey" label-size="sm" label-cols-sm="2" label-align-sm="right" description="This key is stored in your local browser storage and is sent with Etherscan API requests" class="mx-0 my-1 p-0">
-                    <b-form-input type="text" size="sm" id="etherscan-apikey" v-model.trim="settings.etherscanAPIKey" @change="settingsUpdated" debounce="600" placeholder="See https://docs.etherscan.io/ to obtain an API key" class="w-75"></b-form-input>
-                  </b-form-group>
-                </b-form-group>
-
-              </b-card-body>
-            </b-card> -->
 
             <b-table small fixed striped selectable responsive hover :fields="mainTableFields" :items="pagedFilteredSortedMainTable" show-empty empty-html="Enter ERC-721 NFT collection address in the top left input field and click Retrieve" head-variant="light" class="m-0 mt-1">
               <template #head(number)="data">
@@ -185,268 +157,7 @@
                 </b-avatar>
               </template>
             </b-table>
-
-            <b-table v-if="false" small fixed striped selectable responsive hover :fields="addressesFields" :items="pagedFilteredSortedAddresses" show-empty empty-html="Click [+] above to add addresses and Ethereum transaction hashes, and set your Etherscan API key for imports. Click on your address on the top right to add it" head-variant="light" class="m-0 mt-1">
-              <template #head(number)="data">
-                <b-dropdown size="sm" variant="link" v-b-popover.hover="'Toggle selection'">
-                  <template #button-content>
-                    <b-icon-check-square shift-v="+1" font-scale="0.9"></b-icon-check-square>
-                  </template>
-                  <b-dropdown-item href="#" @click="toggleSelectedAddresses(pagedFilteredSortedAddresses)">Toggle selection for all addresses on this page</b-dropdown-item>
-                  <b-dropdown-item href="#" @click="toggleSelectedAddresses(filteredSortedAddresses)">Toggle selection for all addresses on all pages</b-dropdown-item>
-                  <b-dropdown-item href="#" @click="clearSelectedAddresses()">Clear selection</b-dropdown-item>
-                </b-dropdown>
-              </template>
-              <template #cell(number)="data">
-                <b-form-checkbox size="sm" :checked="selectedAddresses[data.item.address] ? 1 : 0" value="1" @change="toggleSelectedAddresses([data.item])">
-                  {{ parseInt(data.index) + ((settings.addressTable.currentPage - 1) * settings.addressTable.pageSize) + 1 }}
-                </b-form-checkbox>
-              </template>
-              <template #cell(type)="data">
-                <b-button class="sm" :id="'popover-target-' + data.item.address" variant="link" class="m-0 p-0">
-                  <b-icon-caret-right shift-v="+5" font-scale="0.8"></b-icon-caret-right>
-                </b-button>
-                <b-popover :target="'popover-target-' + data.item.address" placement="right" custom-class="popover-max-width">
-                  <template #title>{{ ensOrAddress(data.item.address) }}</template>
-                  <b-link @click="copyToClipboard(data.item.address);">Copy address to clipboard</b-link>
-                  <span v-if="ensOrAddress(data.item.address) != data.item.address">
-                    <br />
-                    <b-link @click="copyToClipboard(ensOrAddress(data.item.address));">Copy ENS name to clipboard</b-link>
-                    <br />
-                    <b-link :href="'https://app.ens.domains/name/' + ensOrAddress(data.item.address)" target="_blank">View ENS name in app.ens.domains</b-link>
-                  </span>
-                  <br />
-                  <b-link :href="'https://etherscan.io/address/' + data.item.address" target="_blank">View account in etherscan.io</b-link>
-                  <br />
-                  <b-link :href="'https://opensea.io/' + data.item.address" target="_blank">View account in opensea.io</b-link>
-                  <br />
-                  <b-link :href="'https://opensea.io/' + data.item.address + '?tab=bids'" target="_blank">View offers received in opensea.io</b-link>
-                  <br />
-                  <b-link :href="'https://looksrare.org/accounts/' + data.item.address + '#owned'" target="_blank">View account in looksrare.org</b-link>
-                  <br />
-                  <b-link :href="'https://x2y2.io/user/' + data.item.address + '/items'" target="_blank">View account in x2y2.io</b-link>
-                  <br />
-                  <b-link :href="'https://www.gem.xyz/profile/' + data.item.address" target="_blank">View account in gem.xyz</b-link>
-                </b-popover>
-                <!-- <div v-if="settings.editAddresses">
-                  <b-form-select size="sm" :disabled="!settings.editAddresses" v-model="data.item.type" @change="addressesUpdated" :options="addressTypes" v-b-popover.hover.top="'Address type'"></b-form-select>
-                </div>
-                <div v-else>
-                  {{ addressTypes.find(e => e.value == data.item.type).text }}
-                </div> -->
-              </template>
-              <template #cell(mine)="data">
-                <div v-if="settings.editAddresses">
-                  <b-form-checkbox size="sm" :checked="data.item.mine ? 1 : 0" value="1" @change="toggleAddressMine(data.item.address)">
-                  </b-form-checkbox>
-                </div>
-                <div v-else>
-                  <b-form-checkbox size="sm" disabled :checked="data.item.mine ? 1 : 0" value="1">
-                  </b-form-checkbox>
-                </div>
-              </template>
-              <template #cell(address)="data">
-                <div class="d-flex flex-row">
-                  <div style="min-width: 3.0rem;">
-                    <b-avatar v-if="ensOrAddress(data.item.address) != data.item.address" rounded variant="light" size="3.0rem" :src="'https://metadata.ens.domains/mainnet/avatar/' + ensOrAddress(data.item.address)" v-b-popover.hover="'Your ENS avatar if set'"></b-avatar>
-                  </div>
-                  <div>
-                    <b-badge variant="default">{{ data.item.address }}</b-badge>
-                    <br />
-                    <b-badge v-if="ensOrAddress(data.item.address) != data.item.address" variant="default">{{ ensOrAddress(data.item.address) }}</b-badge>
-                  </div>
-                </div>
-              </template>
-              <!-- <template #cell(ens)="data">
-                <b-link v-if="ensOrAddress(data.item.address) != data.item.address" :href="'https://etherscan.io/address/' + data.item.address" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">
-                  {{ ensOrAddress(data.item.address) }}
-                </b-link>
-              </template> -->
-              <template #cell(group)="data">
-                <div v-if="settings.editAddresses">
-                  <b-form-input type="text" size="sm" v-model.trim="addresses[data.item.address].group" @change="addressesUpdated" debounce="600"></b-form-input>
-                </div>
-                <div v-else>
-                  {{ data.item.group }}
-                </div>
-              </template>
-              <template #cell(name)="data">
-                <div v-if="settings.editAddresses">
-                  <b-form-input type="text" size="sm" v-model.trim="addresses[data.item.address].name" @change="addressesUpdated" debounce="600"></b-form-input>
-                </div>
-                <div v-else>
-                  {{ data.item.name }}
-                </div>
-              </template>
-              <template #cell(notes)="data">
-                <div v-if="settings.editAddresses">
-                  <b-form-input type="text" size="sm" v-model.trim="addresses[data.item.address].notes" @change="addressesUpdated" debounce="600"></b-form-input>
-                </div>
-                <div v-else>
-                  {{ data.item.notes }}
-                </div>
-              </template>
-              <template #cell(end)="data">
-                <b-button size="sm" @click="toggleAddressDetails(data)" variant="link" class="m-0 p-0" v-b-popover.hover="data.item._showDetails ? 'Hide details' : 'Show details'"><span v-if="data.item._showDetails"><b-icon-arrows-angle-contract shift-v="+1" font-scale="0.9"></b-icon-arrows-angle-contract></span><span v-else><b-icon-arrows-angle-expand shift-v="+1" font-scale="0.9"></b-icon-arrows-angle-expand></span></b-button>
-              </template>
-              <template #row-details="data">
-                <b-card>
-                  <b-row class="mb-2">
-                    <b-col sm="3" class="text-sm-right"><b>Address:</b></b-col>
-                    <b-col>{{ data.item.address }}</b-col>
-                  </b-row>
-                  <b-row class="mb-2">
-                    <b-col sm="3" class="text-sm-right"><b>ENS:</b></b-col>
-                    <b-col>{{ ensOrAddress(data.item.address) }}</b-col>
-                  </b-row>
-                  <b-row class="mb-2">
-                    <b-col sm="3" class="text-sm-right"><b>Import transactions:</b></b-col>
-                    <b-col><b-button size="sm" @click="processIt('importFromEtherscan', data.item.address)" variant="primary" v-b-popover.hover.top="'Import from Etherscan, rate limited to 1 request every 5 seconds'">Import</b-button></b-col>
-                  </b-row>
-                  <!-- <b-button size="sm" @click="toggleAddressDetails(data)" variant="link" v-b-popover.hover.top="data.item._showDetails ? 'Hide details' : 'Show details'"><span v-if="data.item._showDetails"><b-icon-dash shift-v="+1" font-scale="1.0"></b-icon-dash></span><span v-else><b-icon-plus shift-v="+1" font-scale="1.0"></b-icon-plus></span></b-button> -->
-                </b-card>
-              </template>
-            </b-table>
           </b-card>
-
-          <!-- <b-card v-if="settings.showImport" no-body no-header bg-variant="light" class="m-1 p-1 w-75">
-            <b-card-body class="m-1 p-1">
-              <b-form-group label-cols-lg="2" label="Import Hashes" label-size="md" label-class="font-weight-bold pt-0" class="mb-0">
-                <b-form-group label="Hashes:" label-for="importhashes-hashes" label-size="sm" label-cols-sm="2" label-align-sm="right" description="Export from Etherscan.io and paste in the column of Ethereum tx hashes" class="mx-0 my-1 p-0">
-                  <b-form-textarea size="sm" id="importhashes-hashes" v-model.trim="hashesToImport" rows="1" max-rows="5" class="w-100"></b-form-textarea>
-                </b-form-group>
-                <b-form-group label="" label-for="importhashes-submit" label-size="sm" label-cols-sm="2" label-align-sm="right" description="Tx hashes will be saved into your local browser storage" class="mx-0 my-1 p-0">
-                  <b-button size="sm" id="importhashes-submit" :disabled="hashesToImport == null || hashesToImport.length == 0" @click="processIt('importHashes')" variant="warning">Import</b-button>
-                </b-form-group>
-              </b-form-group>
-            </b-card-body>
-          </b-card> -->
-
-          <b-card-body v-if="false" class="m-0 px-1 py-0 pt-1">
-            <div class="d-flex flex-wrap m-0 p-0">
-              <div class="mt-0 pr-1">
-                <b-form-input type="text" size="sm" v-model.trim="settings.txs.searchTxs" @change="settingsUpdated" debounce="600" v-b-popover.hover.top="'Filter by partial tx hash, address, name'" placeholder="🔍 {txHash|addr|name} "></b-form-input>
-              </div>
-              <!-- <div class="mt-0 pr-0">
-                <b-button size="sm" :pressed.sync="settings.showImport" @change="settingsUpdated" variant="link" v-b-popover.hover.top="'Show import dialog to import hashes'"><span v-if="settings.showImport"><b-icon-plus-square-fill shift-v="+1" font-scale="1.0"></b-icon-plus-square-fill></span><span v-else><b-icon-plus-square shift-v="+1" font-scale="1.0"></b-icon-plus-square></span></b-button>
-              </div> -->
-              <div class="mt-0 pr-1">
-                <b-button size="sm" :disabled="sync.section != null" @click="processIt('retrieveData')" variant="primary" style="min-width: 40px;" v-b-popover.hover.top="'Retrieve tx data via web3 for your imported tx hashes'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download></b-button>
-              </div>
-              <div class="mt-0 pr-1">
-                <b-form-select size="sm" v-model="settings.txs.period" :options="txsPeriodOptions" @change="settingsUpdated" v-b-popover.hover.top="'Period'"></b-form-select>
-              </div>
-              <div class="mt-0 pr-1">
-                <b-button size="sm" :disabled="sync.section != null" @click="processIt('compute')" variant="link" v-b-popover.hover.top="'Perform computations on selected items'"><b-icon-caret-right-square shift-v="+1" font-scale="0.9"></b-icon-caret-right-square></b-button>
-              </div>
-              <div class="mt-0 flex-grow-1">
-              </div>
-              <div class="mt-1" style="width: 200px;">
-                <b-progress v-if="sync.section != null" height="1.5rem" :max="sync.total" show-progress :animated="sync.section != null" :variant="sync.section != null ? 'success' : 'secondary'" v-b-popover.hover.top="'Click the button on the right to stop. This process can be continued later'">
-                  <b-progress-bar :value="sync.completed">
-                    {{ sync.total == null ? (sync.completed + ' ' + sync.section) : (sync.completed + '/' + sync.total + ' ' + ((sync.completed / sync.total) * 100).toFixed(0) + '% ' + sync.section) }}
-                  </b-progress-bar>
-                </b-progress>
-              </div>
-              <div class="ml-0 mt-1">
-                <b-button v-if="sync.section != null" size="sm" @click="halt" variant="link" v-b-popover.hover.top="'Click to stop. This process can be continued later'"><b-icon-stop-fill shift-v="+1" font-scale="1.0"></b-icon-stop-fill></b-button>
-              </div>
-              <div class="mt-0 flex-grow-1">
-              </div>
-              <div class="mt-0 pr-1">
-                <b-button size="sm" @click="exportTxHashes" variant="link">Export</b-button>
-              </div>
-              <div class="mt-0 flex-grow-1">
-              </div>
-              <!-- <div class="mt-0 pr-1">
-                <b-button size="sm" :pressed.sync="settings.showAddresses" @click="settingsUpdated" variant="link" v-b-popover.hover.top="'Show addresses'"><span v-if="settings.showAddresses"><b-icon-people-fill shift-v="+1" font-scale="1.0"></b-icon-people-fill></span><span v-else><b-icon-people shift-v="+1" font-scale="1.0"></b-icon-people></span></b-button>
-              </div> -->
-              <div class="mt-0 pr-1">
-                <b-form-select size="sm" v-model="settings.txs.sortOption" @change="settingsUpdated" :options="txsSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
-              </div>
-              <div class="mt-0 pr-1">
-                <font size="-2" v-b-popover.hover.top="'# txs'">{{ filteredSortedTxs.length }}</font>
-              </div>
-              <div class="mt-0 pr-1">
-                <b-pagination size="sm" v-model="settings.txs.currentPage" @input="settingsUpdated" :total-rows="filteredSortedTxs.length" :per-page="settings.txs.pageSize" style="height: 0;"></b-pagination>
-              </div>
-              <div class="mt-0 pl-1">
-                <b-form-select size="sm" v-model="settings.txs.pageSize" @change="settingsUpdated" :options="pageSizes" v-b-popover.hover.top="'Transactions page size'"></b-form-select>
-              </div>
-            </div>
-
-            <b-table small fixed striped selectable responsive hover :fields="txsFields" :items="pagedFilteredSortedTxs" show-empty head-variant="light" class="m-0 mt-1">
-              <template #head(number)="data">
-                <b-dropdown size="sm" variant="link" v-b-popover.hover="'Toggle selection'">
-                  <template #button-content>
-                    <b-icon-check-square shift-v="+1" font-scale="0.9"></b-icon-check-square>
-                  </template>
-                  <b-dropdown-item href="#" @click="toggleSelectedTxs(pagedFilteredSortedTxs)">Toggle selection for all transactions on this page</b-dropdown-item>
-                  <b-dropdown-item href="#" @click="toggleSelectedTxs(filteredSortedTxs)">Toggle selection for all transactions on all pages</b-dropdown-item>
-                  <b-dropdown-item href="#" @click="clearSelectedTxs()">Clear selection</b-dropdown-item>
-                </b-dropdown>
-              </template>
-              <template #cell(number)="data">
-                <b-form-checkbox size="sm" :checked="selectedTxs[data.item.txHash] ? 1 : 0" value="1" @change="toggleSelectedTxs([data.item])">
-                  {{ parseInt(data.index) + ((settings.txs.currentPage - 1) * settings.txs.pageSize) + 1 }}
-                </b-form-checkbox>
-              </template>
-              <template #cell(timestamp)="data">
-                <b-link :href="'https://etherscan.io/tx/' + data.item.txHash" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ formatTimestamp(data.item.timestamp) }}</b-link>
-              </template>
-              <template #cell(from)="data">
-                <div v-if="addressName(data.item.from).type == 'name'">
-                  <b-badge variant="default" v-b-popover.hover.bottom="'From address'">{{ addressName(data.item.from).name }}</b-badge>
-                </div>
-                <div v-else>
-                  <b-link :href="'https://etherscan.io/address/' + data.item.from" v-b-popover.hover.bottom="'View address in Etherscan.io'" target="_blank">
-                    <b-badge variant="default">{{ addressName(data.item.from).name }}</b-badge>
-                  </b-link>
-                </div>
-              </template>
-              <template #cell(to)="data">
-                <div v-if="addressName(data.item.to).type == 'name'">
-                  <b-badge variant="default" v-b-popover.hover.bottom="'To address'">{{ addressName(data.item.to).name }}</b-badge>
-                </div>
-                <div v-else>
-                  <b-link :href="'https://etherscan.io/address/' + data.item.to" v-b-popover.hover.bottom="'View address in Etherscan.io'" target="_blank">
-                    <b-badge variant="default">{{ addressName(data.item.to).name }}</b-badge>
-                  </b-link>
-                </div>
-              </template>
-              <template #cell(blah)="data">
-                <!-- Blah -->
-              </template>
-              <template #cell(txHash)="data">
-                <!-- <b-link :href="'https://etherscan.io/tx/' + data.item.txHash" v-b-popover.hover.bottom="'View tx in Etherscan.io'" target="_blank">
-                  {{ data.item.txHash.substring(0, 16) }}
-                </b-link> -->
-                <!-- <b-button size="sm" @click="toggleTxsDetails(data)" variant="link" v-b-popover.hover.top="data.item._showDetails ? 'Hide details' : 'Show details'"><span v-if="data.item._showDetails"><b-icon-dash shift-v="+1" font-scale="1.0"></b-icon-dash></span><span v-else><b-icon-plus shift-v="+1" font-scale="1.0"></b-icon-plus></span></b-button> -->
-              </template>
-              <template #cell(balance)="data">
-                <font size="-2">
-                  <b-badge variant="default" v-b-popover.hover.bottom="'From account balance, previous block'">{{ formatETH(data.item.ethBalancePreviousBlock) }}</b-badge>
-                </font>
-                <b-badge variant="default" v-b-popover.hover.bottom="'From account balance'">{{ formatETH(data.item.ethBalance) }}</b-badge>
-              </template>
-              <template #cell(end)="data">
-                <b-button size="sm" @click="toggleTxsDetails(data)" variant="link" v-b-popover.hover.top="data.item._showDetails ? 'Hide details' : 'Show details'"><span v-if="data.item._showDetails"><b-icon-dash shift-v="+1" font-scale="1.0"></b-icon-dash></span><span v-else><b-icon-plus shift-v="+1" font-scale="1.0"></b-icon-plus></span></b-button>
-              </template>
-              <template #row-details="data">
-                <b-card>
-                  <b-row class="mb-2">
-                    <b-col sm="3" class="text-sm-right"><b>Tx Hash:</b></b-col>
-                    <b-col>{{ data.item.txHash }}</b-col>
-                  </b-row>
-                  <b-row class="mb-2">
-                    <b-col sm="3" class="text-sm-right"><b>From:</b></b-col>
-                    <b-col>{{ ensOrAddress(data.item.from) }}</b-col>
-                  </b-row>
-                  <!-- <b-button size="sm" @click="toggleTxsDetails(data)" variant="link" v-b-popover.hover.top="data.item._showDetails ? 'Hide details' : 'Show details'"><span v-if="data.item._showDetails"><b-icon-dash shift-v="+1" font-scale="1.0"></b-icon-dash></span><span v-else><b-icon-plus shift-v="+1" font-scale="1.0"></b-icon-plus></span></b-button> -->
-                </b-card>
-              </template>
-            </b-table>
-          </b-card-body>
         </b-card>
         <b-card no-header body-class="m-0 p-0" class="m-0 p-0 border-0">
           <b-card-text class="text-right">
@@ -513,6 +224,7 @@
               slug: null,
             }
           },
+          secondaryData: {},
 
           ensMap: {},
           selectedMainTable: {},
@@ -1161,12 +873,45 @@
                 }
                 console.log("owners: " + JSON.stringify(owners));
 
-                // let continuation = null;
                 this.sync.completed = 0;
                 this.sync.total = owners.count;
                 this.sync.section = "Secondary collection";
                 for (let owner of owners) {
                   // console.log("Processing: " + owner);
+                  let stop = false;
+                  for (let offset = 0; !stop; offset++) {
+                    // https://api.reservoir.tools/users/0xF296178d553C8Ec21A2fBD2c5dDa8CA9ac905A00/tokens/v5?sortBy=acquiredAt&sortDirection=desc&offset=0&limit=20&includeTopBid=false
+                    let url = "https://api.reservoir.tools/users/" + owner + "/tokens/v5?sortBy=acquiredAt&sortDirection=desc&offset=" + offset + "&limit=100&includeTopBid=false";
+                    console.log("url: " + url);
+                    const data = await fetch(url)
+                      .then(handleErrors)
+                      .then(response => response.json())
+                      .catch(function(error) {
+                         console.log("ERROR - updateCollection: " + error);
+                         // state.sync.error = true;
+                         return [];
+                      });
+                    // continuation = data.continuation;
+                    if (data && data.tokens && data.tokens.length > 0 && offset < 3) {
+                      console.log(JSON.stringify(data.tokens, null, 2));
+                    //   for (const tokenData of data.tokens) {
+                    //     const token = tokenData.token;
+                    //     mainTokens[token.tokenId] = {
+                    //       owner: token.owner,
+                    //       image: token.image,
+                    //     };
+                    //     if (this.mainToken.collection.name == null) {
+                    //       this.mainToken.collection.name = token.collection.name;
+                    //       this.mainToken.collection.image = token.collection.image;
+                    //       this.mainToken.collection.slug = token.collection.slug;
+                    //     }
+                    //   }
+                    } else {
+                      stop = true;
+                    }
+                    await delay(500); // TODO: Adjust to avoid error 429 Too Many Requests. Fails at 200ms
+                  }
+
                   this.sync.completed = parseInt(this.sync.completed) + 1;
                   if (this.halt) {
                     break;
@@ -1201,35 +946,6 @@
                     console.log("error: " + error);
                   });
                 }
-              }
-
-              if (false && action == "importHashes") {
-                const hashesToImport = this.hashesToImport == null ? [] : this.hashesToImport.split(/[, \t\n]+/).filter(name => (name.length == 66 && name.substring(0, 2) == '0x'));
-                console.log(JSON.stringify(hashesToImport, null, 2));
-                let importOrder = 0;
-                for (const txHash of hashesToImport) {
-                  if (!(txHash in this.txHashes)) {
-                    this.txHashes[txHash] = {
-                      txHash,
-                      timestamp: null,
-                      // blockNumber: null,
-                      // from: null,
-                      data: {
-                        tx: null,
-                        txReceipt: null,
-                        ethBalance: null,
-                        ethBalancePreviousBlock: null,
-                        imported: timestamp,
-                        importOrder,
-                      },
-                    };
-                    importOrder++;
-                  }
-                }
-                await db0.cache.put({ objectName: 'txHashes', object: this.txHashes }).then (function() {
-                }).catch(function(error) {
-                  console.log("error: " + error);
-                });
               }
 
               if (false && (action == "connect" || action == "addAddresses")) {
@@ -1267,65 +983,6 @@
                 });
               }
 
-              if (false && action == "retrieveData") {
-                console.log("Retrieving data");
-                const txHashesToProcess = [];
-                for (const [txHash, txItem] of Object.entries(this.txHashes)) {
-                  if (txItem.timestamp == null) {
-                    txHashesToProcess.push(txHash);
-                  }
-                }
-                this.sync.total = Object.keys(this.txHashes).length;
-                this.sync.completed = this.sync.total - txHashesToProcess.length;
-                this.sync.section = "Retrieve Data";
-                let i = 0;
-                for (const txHash of txHashesToProcess) {
-                  const tx = await provider.getTransaction(txHash);
-                  const txReceipt = await provider.getTransactionReceipt(txHash);
-                  const block = await provider.getBlock(txReceipt.blockNumber);
-                  const ethBalance = await provider.getBalance(tx.from, txReceipt.blockNumber);
-                  const ethBalancePreviousBlock = await provider.getBalance(tx.from, txReceipt.blockNumber - 1);
-                  this.txHashes[txHash].timestamp = block.timestamp;
-                  this.txHashes[txHash].data.tx = {
-                    hash: tx.hash,
-                    type: tx.type,
-                    blockHash: tx.blockHash,
-                    blockNumber: tx.blockNumber,
-                    transactionIndex: tx.transactionIndex,
-                    from: tx.from,
-                    gasPrice: tx.gasPrice,
-                    gasLimit: tx.gasLimit,
-                    to: tx.to,
-                    value: tx.value,
-                    nonce: tx.nonce,
-                    data: tx.data,
-                    r: tx.r,
-                    s: tx.s,
-                    v: tx.v,
-                    chainId: tx.chainId,
-                  };
-                  this.txHashes[txHash].data.txReceipt = txReceipt;
-                  this.txHashes[txHash].data.ethBalance = ethBalance;
-                  this.txHashes[txHash].data.ethBalancePreviousBlock = ethBalancePreviousBlock;
-                  // console.log(JSON.stringify(this.txHashes[txHash], null, 2));
-                  this.sync.completed = parseInt(this.sync.completed) + 1;
-                  i++;
-                  if ((i % 10) == 9) {
-                    await db0.cache.put({ objectName: 'txHashes', object: this.txHashes }).then (function() {
-                    }).catch(function(error) {
-                      console.log("error: " + error);
-                    });
-                  }
-                  if (this.sync.halt) {
-                    break;
-                  }
-                }
-                await db0.cache.put({ objectName: 'txHashes', object: this.txHashes }).then (function() {
-                }).catch(function(error) {
-                  console.log("error: " + error);
-                });
-                this.sync.section = null;
-              }
 
               if (false && (action == "addAddresses" || action == "retrieveData" || action == "connect")) {
                 const ensMap = {};
@@ -1402,156 +1059,6 @@
                 });
               }
 
-              if (false && action == "compute") {
-                console.log("compute: " + JSON.stringify(Object.keys(this.selectedTxs)));
-                for (let txHash of Object.keys(this.selectedTxs)) {
-                  const txItem = this.txHashes[txHash];
-                  // console.log(JSON.stringify(txItem, null, 2));
-                  parseTx(txItem, provider);
-                }
-              }
-
-              if (false && action == "computeAddresses") {
-                console.log("computeAddresses");
-                this.sync.completed = 0;
-                const exclude = []; // ["0x5c40eF6f527f4FbA68368774E6130cE6515123f2", "0x755cdba6AE4F479f7164792B318b2a06c759833B", "0x5F0281910Af44bFb5fC7e86A404d0304B0e042F1", "0xe36f573DbeCDdBbcb72dD6270aF7978963F4C2D3", "0x60E112d4E585bba817Dc513bF9a03cd9b5A46Fc9", "0xcAFFa1d66eaE19887319ab9AECA5bd9aEB9D2DDE"];
-                const addresses = Object.keys(this.selectedAddresses);
-                // const addresses = Object.keys(this.addresses).filter(e => !exclude.includes(e));
-                // console.log("addresses: " + JSON.stringify(addresses));
-                this.sync.total = addresses.length;
-                this.sync.section = "Addresses";
-
-                const SPECIALS = {
-                  "0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85": {
-                    mask: MASK_ISERC721,
-                    type: "erc721",
-                    symbol: "ENS",
-                    name: "Ethereum Name Service",
-                  },
-                  "0xB22c1C159d12461EA124b0deb4b5b93020E6Ad16": {
-                    mask: MASK_ISCONTRACT,
-                    type: "contract",
-                    symbol: "ENS",
-                    name: "Old ETH Registrar Controller 2",
-                  },
-                  "0xBB9bc244D798123fDe783fCc1C72d3Bb8C189413": {
-                    mask: MASK_ISERC20,
-                    type: "erc20",
-                    symbol: "DAO",
-                    name: "The DAO",
-                  },
-                  "0xBf4eD7b27F1d666546E30D74d50d173d20bca754": {
-                    mask: MASK_ISERC20,
-                    type: "erc20",
-                    symbol: "WithdrawDAO",
-                    name: "WithdrawDAO",
-                  },
-                };
-
-                for (let i = 0; i < addresses.length & !this.sync.halt; i++) {
-                  const address = addresses[i];
-                  console.log("address: " + JSON.stringify(address));
-
-                  let mask = null;
-                  let type = null;
-                  let symbol = null;
-                  let name = null;
-
-                  if (address in SPECIALS) {
-                    mask = SPECIALS[address].mask;
-                    type = SPECIALS[address].type;
-                    symbol = SPECIALS[address].symbol;
-                    name = SPECIALS[address].name;
-                    console.log("SPECIAL " + address + " - mask: " + mask + ", type: " + type + ", symbol: " + symbol + ", name: " + name);
-                  } else {
-                    try {
-                      const tokenInfos = await erc721Helper.tokenInfo([address], { gasLimit: 100000000 });
-                      for (let i = 0; i < tokenInfos[0].length; i++) {
-                        const mask = tokenInfos[0][i].toNumber();
-                        const symbol = tokenInfos[1][i];
-                        const name = tokenInfos[2][i];
-                      }
-                      console.log("tokenInfo OK " + address + " - mask: " + mask + ", type: " + type + ", symbol: " + symbol + ", name: " + name);
-                    } catch (e) {
-                      console.log("tokenInfo ERROR - address: " + address + ", message: " + e.message);
-                    }
-                  }
-
-                  if ((mask & MASK_ISEOA) == MASK_ISEOA) {
-                    Vue.set(this.addresses[address], "type", "eoa");
-                  } else if ((mask & MASK_ISERC721) == MASK_ISERC721) {
-                    console.log("mask: erc721");
-                    Vue.set(this.addresses[address], "type", "erc721");
-                    Vue.set(this.addresses[address], "name", symbol + ': ' + name);
-                    Vue.set(this.addresses[address], "contract", { name, symbol });
-                  } else if ((mask & MASK_ISERC20) == MASK_ISERC20) {
-                    console.log("mask: erc20");
-                    Vue.set(this.addresses[address], "type", "erc20");
-                    Vue.set(this.addresses[address], "name", symbol + ': ' + name);
-                    Vue.set(this.addresses[address], "contract", { name, symbol });
-                  } else if ((mask & MASK_ISCONTRACT) == MASK_ISCONTRACT) {
-                    console.log("mask: contract");
-                    Vue.set(this.addresses[address], "type", "contract");
-                    if (symbol && symbol.length > 0 || name && name.length > 0) {
-                      Vue.set(this.addresses[address], "name", symbol + ': ' + name);
-                      Vue.set(this.addresses[address], "contract", { name, symbol });
-                    }
-                  }
-
-                  this.sync.completed++;
-
-                  // try {
-                  //   const tokenInfos = await erc721Helper.tokenInfo([address], { gasLimit: 100000000 });
-                  //   console.log("tokenInfos: " + JSON.stringify(tokenInfos));
-                  //   for (let i = 0; i < tokenInfos[0].length; i++) {
-                  //     // const mask = ethers.BigNumber.from(tokenInfos[0][i]).toString();
-                  //     const mask = tokenInfos[0][i].toNumber();
-                  //     const symbol = tokenInfos[1][i];
-                  //     const name = tokenInfos[2][i];
-                  //     console.log("mask: " + JSON.stringify(mask));
-                  //     if ((mask & MASK_ISEOA) == MASK_ISEOA) {
-                  //       Vue.set(this.addresses[address], "type", "eoa");
-                  //     } else if ((mask & MASK_ISERC721) == MASK_ISERC721) {
-                  //       console.log("mask: erc721");
-                  //       Vue.set(this.addresses[address], "type", "erc721");
-                  //       Vue.set(this.addresses[address], "name", symbol + ': ' + name);
-                  //       Vue.set(this.addresses[address], "contract", { name, symbol });
-                  //     } else if ((mask & MASK_ISERC20) == MASK_ISERC20) {
-                  //       console.log("mask: erc20");
-                  //       Vue.set(this.addresses[address], "type", "erc20");
-                  //       Vue.set(this.addresses[address], "name", symbol + ': ' + name);
-                  //       Vue.set(this.addresses[address], "contract", { name, symbol });
-                  //     } else if ((mask & MASK_ISCONTRACT) == MASK_ISCONTRACT) {
-                  //       console.log("mask: contract");
-                  //       Vue.set(this.addresses[address], "type", "contract");
-                  //     }
-                  //     if (mask > 0) {
-                  //   //     const totalSupply = ethers.BigNumber.from(tokenInfos[3][i]).toString();
-                  //   //     tokenContracts[contractAddresses[i].toLowerCase()] = { mask, symbol, name, totalSupply };
-                  //     }
-                  //   }
-                  // } catch (e) {
-                  //   console.log("error: " + e.message);
-                  // }
-
-                  // this.sync.completed++;
-                  // const tokenContracts = {};
-                  // for (let i = 0; i < tokenInfos[0].length; i++) {
-                  //   const mask = ethers.BigNumber.from(tokenInfos[0][i]).toString();
-                  //   if (mask > 0) {
-                  //     const symbol = tokenInfos[1][i];
-                  //     const name = tokenInfos[2][i];
-                  //     const totalSupply = ethers.BigNumber.from(tokenInfos[3][i]).toString();
-                  //     tokenContracts[contractAddresses[i].toLowerCase()] = { mask, symbol, name, totalSupply };
-                  //   }
-                  // }
-                }
-                // console.log(JSON.stringify(this.addresses));
-                await db0.cache.put({ objectName: 'addresses', object: this.addresses }).then (function() {
-                }).catch(function(error) {
-                  console.log("error: " + error);
-                });
-              }
 
               db0.close();
               this.sync.section = null;
@@ -1625,7 +1132,7 @@
             const mainToken = await db0.cache.where("objectName").equals('mainToken').toArray();
             if (mainToken.length == 1) {
               this.mainToken = mainToken[0].object;
-              console.log("mounted - mainToken.owners: " + JSON.stringify(this.mainToken.owners, null, 2));
+              // console.log("mounted - mainToken.owners: " + JSON.stringify(this.mainToken.owners, null, 2));
             }
             const ensMap = await db0.cache.where("objectName").equals('ensMap').toArray();
             if (ensMap.length == 1) {
