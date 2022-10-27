@@ -88,6 +88,15 @@
               </div> -->
               <div class="mt-0 flex-grow-1">
               </div>
+              <div class="mt-1" style="width: 200px;">
+                <b-progress v-if="sync.section != null" height="1.5rem" :max="sync.total" show-progress :animated="sync.section != null" :variant="sync.section != null ? 'success' : 'secondary'" v-b-popover.hover.top="'Click the button on the right to stop. This process can be continued later'">
+                  <b-progress-bar :value="sync.completed">
+                    {{ sync.total == null ? (sync.completed + ' ' + sync.section) : (sync.completed + '/' + sync.total + ' ' + ((sync.completed / sync.total) * 100).toFixed(0) + '% ' + sync.section) }}
+                  </b-progress-bar>
+                </b-progress>
+              </div>
+              <div class="mt-0 flex-grow-1">
+              </div>
               <!-- <div class="mt-0 flex-grow-1">
               </div>
               <div class="mt-0 pr-0">
@@ -455,6 +464,20 @@
           addresses: {},
           txHashes: {},
           importData: {},
+
+          mainTokens: {},
+          mainOwners: {},
+
+          mainToken: {
+            tokens: {},
+            owners: {},
+            collection: {
+              name: null,
+              image: null,
+              slug: null,
+            }
+          },
+
           ensMap: {},
           selectedAddresses: {},
           selectedTxs: {},
@@ -530,7 +553,7 @@
             { key: 'end', label: '', sortable: false, thStyle: 'width: 5%;', thClass: 'text-right', tdClass: 'text-right' },
           ],
           db: {
-            name: "txs089",
+            name: "nftowner089",
             version: 1,
             schemaDefinition: {
               cache: '&objectName',
@@ -957,9 +980,10 @@
 
                 let continuation = null;
                 this.sync.completed = 0;
-                this.sync.total = 0;
+                this.sync.total = null;
                 this.sync.section = "Main collection";
                 const mainTokens = {};
+                this.mainToken.collection.name = null;
                 do {
                   let url = "https://api.reservoir.tools/tokens/v5?contract=" + this.settings.mainCollection + "&limit=100" +
                     (continuation != null ? "&continuation=" + continuation : '');
@@ -972,15 +996,20 @@
                        // state.sync.error = true;
                        return [];
                     });
-                  // continuation = data.continuation;
+                  continuation = data.continuation;
                   if (data && data.tokens) {
                     for (const tokenData of data.tokens) {
                       const token = tokenData.token;
-                      console.log(JSON.stringify(token, null, 2));
+                      // console.log(JSON.stringify(token, null, 2));
                       mainTokens[token.tokenId] = {
                         owner: token.owner,
                         image: token.image,
                       };
+                      if (this.mainToken.collection.name == null) {
+                        this.mainToken.collection.name = token.collection.name;
+                        this.mainToken.collection.image = token.collection.image;
+                        this.mainToken.collection.slug = token.collection.slug;
+                      }
                     //   let price = null;
                     //   let validUntil = null;
                     //   let source = null;
@@ -992,20 +1021,57 @@
                     //   prices[token.token.tokenId] = { price, validUntil, source, lastSell: token.token.lastSell, rarityRank: token.rarityRank };
                     }
                   }
-                  // this.sync.completed = Object.keys(prices).length;
+                  this.sync.completed = Object.keys(mainTokens).length;
+                  await delay(500); // TODO: Adjust to avoid error 429 Too Many Requests. Fails at 200ms
                 } while (continuation != null /*&& !state.halt && !state.sync.error */);
-                console.log(JSON.stringify(mainTokens, null, 2));
+                // console.log(JSON.stringify(mainTokens, null, 2));
 
-                const owners = {};
+                const mainOwners = {};
                 for (const [tokenId, data] of Object.entries(mainTokens)) {
-                  console.log(tokenId + " " + JSON.stringify(data));
-                  if (!(data.owner in owners)) {
-                    owners[data.owner] = [];
+                  // console.log(tokenId + " " + JSON.stringify(data));
+                  if (!(data.owner in mainOwners)) {
+                    mainOwners[data.owner] = [];
                   }
-                  owners[data.owner].push(tokenId);
+                  mainOwners[data.owner].push(tokenId);
                 }
-                console.log(JSON.stringify(owners, null, 2));
+                // console.log(JSON.stringify(mainOwners, null, 2));
 
+                this.sync.completed = 0;
+                const addresses = Object.keys(mainOwners);
+                this.sync.total = addresses.length;
+                this.sync.section = "ENS Names";
+                const ensMap = {};
+                for (let i = 0; i < addresses.length & !this.sync.halt; i += ENSOWNERBATCHSIZE) {
+                  const batch = addresses.slice(i, parseInt(i) + ENSOWNERBATCHSIZE);
+                  // console.log("batch: " + JSON.stringify(batch));
+                  const allnames = await ensReverseRecordsContract.getNames(batch);
+                  for (let j = 0; j < batch.length; j++) {
+                    const address = batch[j];
+                    const name = allnames[j];
+                    ensMap[address] = name != null && name.length > 0 ? name : address;
+                    // const normalized = normalize(address);
+                  }
+                  this.sync.completed = parseInt(this.sync.completed) + batch.length;
+                }
+                this.ensMap = ensMap;
+                await db0.cache.put({ objectName: 'ensMap', object: ensMap }).then (function() {
+                }).catch(function(error) {
+                  console.log("error: " + error);
+                });
+
+                this.mainToken.tokens = mainTokens;
+                this.mainToken.owners = mainOwners;
+                await db0.cache.put({ objectName: 'mainToken', object: this.mainToken }).then (function() {
+                }).catch(function(error) {
+                  console.log("error: " + error);
+                });
+                // this.mainOwners = mainOwners;
+                // await db0.cache.put({ objectName: 'mainOwners', object: mainOwners }).then (function() {
+                // }).catch(function(error) {
+                //   console.log("error: " + error);
+                // });
+
+                this.sync.section = null;
               }
 
               // TODO
@@ -1449,37 +1515,39 @@
           //   }
           //   console.log("mounted - after: " + JSON.stringify(this.settings, null, 2));
           // }
-          // (async() => {
-          //   const db0 = new Dexie(this.db.name);
-          //   db0.version(this.db.version).stores(this.db.schemaDefinition);
-          //   const txHashes = await db0.cache.where("objectName").equals('txHashes').toArray();
-          //   if (txHashes.length == 1) {
-          //     this.txHashes = txHashes[0].object;
-          //   }
-          //   const ensMap = await db0.cache.where("objectName").equals('ensMap').toArray();
-          //   if (ensMap.length == 1) {
-          //     this.ensMap = ensMap[0].object;
-          //   }
-          //   const addresses = await db0.cache.where("objectName").equals('addresses').toArray();
-          //   if (addresses.length == 1) {
-          //     this.addresses = addresses[0].object;
-          //     for (const [k, v] of Object.entries(this.addresses)) {
-          //       if (!('type' in v)) {
-          //         v.type = null;
-          //       }
-          //       if (!('mine' in v)) {
-          //         v.mine = false;
-          //       }
-          //       // console.log("mount addresses: " + k + " => " + JSON.stringify(v));
-          //     }
-          //   }
-          //   const importData = await db0.cache.where("objectName").equals('importData').toArray();
-          //   if (importData.length == 1) {
-          //     this.importData = importData[0].object;
-          //     // console.log("mount this.importData: " + JSON.stringify(this.importData));
-          //   }
-          //   db0.close();
-          // })();
+          (async() => {
+            const db0 = new Dexie(this.db.name);
+            db0.version(this.db.version).stores(this.db.schemaDefinition);
+            const mainToken = await db0.cache.where("objectName").equals('mainToken').toArray();
+            if (mainToken.length == 1) {
+              this.mainToken = mainToken[0].object;
+              console.log("mounted - mainToken: " + JSON.stringify(this.mainToken, null, 2));
+            }
+            const ensMap = await db0.cache.where("objectName").equals('ensMap').toArray();
+            if (ensMap.length == 1) {
+              this.ensMap = ensMap[0].object;
+              console.log("mounted - ensMap: " + JSON.stringify(this.ensMap, null, 2));
+            }
+            // const addresses = await db0.cache.where("objectName").equals('addresses').toArray();
+            // if (addresses.length == 1) {
+            //   this.addresses = addresses[0].object;
+            //   for (const [k, v] of Object.entries(this.addresses)) {
+            //     if (!('type' in v)) {
+            //       v.type = null;
+            //     }
+            //     if (!('mine' in v)) {
+            //       v.mine = false;
+            //     }
+            //     // console.log("mount addresses: " + k + " => " + JSON.stringify(v));
+            //   }
+            // }
+            // const importData = await db0.cache.where("objectName").equals('importData').toArray();
+            // if (importData.length == 1) {
+            //   this.importData = importData[0].object;
+            //   // console.log("mount this.importData: " + JSON.stringify(this.importData));
+            // }
+            db0.close();
+          })();
         },
       })
     </script>
