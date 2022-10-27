@@ -1083,7 +1083,7 @@
                     (continuation != null ? "&continuation=" + continuation : '');
                   console.log("url: " + url);
                   const data = await fetch(url)
-                    // .then(handleErrors)
+                    .then(handleErrors)
                     .then(response => response.json())
                     .catch(function(error) {
                        console.log("ERROR - updateCollection: " + error);
@@ -1094,7 +1094,6 @@
                   if (data && data.tokens) {
                     for (const tokenData of data.tokens) {
                       const token = tokenData.token;
-                      // console.log(JSON.stringify(token, null, 2));
                       mainTokens[token.tokenId] = {
                         owner: token.owner,
                         image: token.image,
@@ -1104,25 +1103,14 @@
                         this.mainToken.collection.image = token.collection.image;
                         this.mainToken.collection.slug = token.collection.slug;
                       }
-                    //   let price = null;
-                    //   let validUntil = null;
-                    //   let source = null;
-                    //   if (token.market.floorAsk.price) {
-                    //     price = token.market.floorAsk.price.amount.native;
-                    //     validUntil = token.market.floorAsk.validUntil;
-                    //     source = token.market.floorAsk.source.name;
-                    //   }
-                    //   prices[token.token.tokenId] = { price, validUntil, source, lastSell: token.token.lastSell, rarityRank: token.rarityRank };
                     }
                   }
                   this.sync.completed = Object.keys(mainTokens).length;
                   await delay(500); // TODO: Adjust to avoid error 429 Too Many Requests. Fails at 200ms
                 } while (continuation != null /*&& !state.halt && !state.sync.error */);
-                // console.log(JSON.stringify(mainTokens, null, 2));
 
                 const mainOwners = {};
                 for (const [tokenId, data] of Object.entries(mainTokens)) {
-                  // console.log(tokenId + " " + JSON.stringify(data));
                   if (!(data.owner in mainOwners)) {
                     mainOwners[data.owner] = [];
                   }
@@ -1137,7 +1125,6 @@
                 const ensMap = {};
                 for (let i = 0; i < addresses.length & !this.sync.halt; i += ENSOWNERBATCHSIZE) {
                   const batch = addresses.slice(i, parseInt(i) + ENSOWNERBATCHSIZE);
-                  // console.log("batch: " + JSON.stringify(batch));
                   const allnames = await ensReverseRecordsContract.getNames(batch);
                   for (let j = 0; j < batch.length; j++) {
                     const address = batch[j];
@@ -1152,19 +1139,12 @@
                 }).catch(function(error) {
                   console.log("error: " + error);
                 });
-
                 this.mainToken.tokens = mainTokens;
                 this.mainToken.owners = mainOwners;
                 await db0.cache.put({ objectName: 'mainToken', object: this.mainToken }).then (function() {
                 }).catch(function(error) {
                   console.log("error: " + error);
                 });
-                // this.mainOwners = mainOwners;
-                // await db0.cache.put({ objectName: 'mainOwners', object: mainOwners }).then (function() {
-                // }).catch(function(error) {
-                //   console.log("error: " + error);
-                // });
-
                 this.sync.section = null;
               }
 
