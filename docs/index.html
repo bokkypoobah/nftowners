@@ -77,6 +77,11 @@
               <div class="mt-0 pr-1">
                 <b-button size="sm" :disabled="sync.section != null" @click="processIt('syncCollections')" variant="primary" v-b-popover.hover.top="'Sync selected or all collections'">Sync</b-button>
               </div>
+              <div class="mt-0 flex-grow-1">
+              </div>
+              <div class="mt-0 pr-1">
+                <b-button size="sm" :pressed.sync="settings.addCollection" @click="settingsUpdated" variant="link" v-b-popover.hover.top="'Add new collection'"><span v-if="settings.addCollection"><b-icon-plus-square-fill shift-v="+1" font-scale="1.0"></b-icon-plus-square-fill></span><span v-else><b-icon-plus-square shift-v="+1" font-scale="1.0"></b-icon-plus-square></span></b-button>
+              </div>
               <div class="mt-0 pr-1">
                 <b-button size="sm" :disabled="sync.section != null || Object.keys(selectedCollections).length == 0" @click="deleteCollections" variant="link" v-b-popover.hover="'Delete selected collections'"><b-icon-trash style="color: #ff0000;" shift-v="+1" font-scale="1.0"></b-icon-trash></b-button>
               </div>
@@ -103,11 +108,6 @@
               </div>
               <div class="ml-0 mt-1">
                 <b-button v-if="sync.section != null" size="sm" @click="halt" variant="link" v-b-popover.hover.top="'Click to stop. It may take a few minutes to clean up. This process can be continued later'"><b-icon-stop-fill shift-v="+1" font-scale="1.0"></b-icon-stop-fill></b-button>
-              </div>
-              <div class="mt-0 flex-grow-1">
-              </div>
-              <div class="mt-0 pr-1">
-                <b-button size="sm" :pressed.sync="settings.addCollection" @click="settingsUpdated" variant="link" v-b-popover.hover.top="'Add new collection'"><span v-if="settings.addCollection"><b-icon-plus-square-fill shift-v="+1" font-scale="1.0"></b-icon-plus-square-fill></span><span v-else><b-icon-plus-square shift-v="+1" font-scale="1.0"></b-icon-plus-square></span></b-button>
               </div>
               <div class="mt-0 flex-grow-1">
               </div>
@@ -205,7 +205,8 @@
               </template>
             </b-table>
           </b-card>
-          <b-card class="m-0 p-0 border-0" body-class="m-1 p-0" header-class="m-0 p-2">
+
+          <b-card v-if="false" class="m-0 p-0 border-0" body-class="m-1 p-0" header-class="m-0 p-2">
             <template #header>
               Owners
             </template>
@@ -650,6 +651,8 @@
               console.log("Deleting: " + contract);
               Vue.delete(this.collections, contract);
             }
+            this.selectedCollections = {};
+            localStorage.selectedCollections = JSON.stringify(this.selectedCollections);
             const db0 = new Dexie(this.db.name);
             db0.version(this.db.version).stores(this.db.schemaDefinition);
             await db0.cache.put({ objectName: 'collections', object: this.collections }).then (function() {
@@ -839,7 +842,7 @@
                   let continuation = null;
                   this.sync.completed = 0;
                   this.sync.total = null;
-                  this.sync.section = "Sync " + contract.substring(0, 10);
+                  this.sync.section = this.collections[contract].name.substring(0, 24);
                   const tokens = {};
                   // this.mainToken.collection.name = null;
                   do {
@@ -854,8 +857,8 @@
                          // state.sync.error = true;
                          return [];
                       });
-                    // continuation = data.continuation;
-                    console.log(JSON.stringify(data, null, 2));
+                    continuation = data.continuation;
+                    // console.log(JSON.stringify(data, null, 2));
                     if (data && data.tokens) {
                       for (const tokenData of data.tokens) {
                         const token = tokenData.token;
@@ -870,10 +873,10 @@
                         // }
                       }
                     }
-                    // this.sync.completed = Object.keys(mainTokens).length;
+                    this.sync.completed = Object.keys(tokens).length;
                     await delay(500); // TODO: Adjust to avoid error 429 Too Many Requests. Fails at 200ms
                   } while (continuation != null /*&& !state.halt && !state.sync.error */);
-                  console.log("tokens: " + JSON.stringify(tokens, null, 2));
+                  // console.log("tokens: " + JSON.stringify(tokens, null, 2));
                   Vue.set(this.collections[contract], 'tokens', tokens);
 
                   const owners = {};
@@ -883,11 +886,15 @@
                     }
                     owners[data.owner].push(tokenId);
                   }
-                  console.log("owners: " + JSON.stringify(owners, null, 2));
+                  // console.log("owners: " + JSON.stringify(owners, null, 2));
                   Vue.set(this.collections[contract], 'owners', owners);
-
+                  Vue.set(this.collections[contract], 'updated', timestamp);
                 }
-                console.log("collections: " + JSON.stringify(this.collections, null, 2));
+                // console.log("collections: " + JSON.stringify(this.collections, null, 2));
+                await db0.cache.put({ objectName: 'collections', object: this.collections }).then (function() {
+                }).catch(function(error) {
+                  console.log("error: " + error);
+                });
               }
 
 
