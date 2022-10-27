@@ -115,12 +115,12 @@
               <div class="mt-0 pr-1">
                 <b-form-select size="sm" v-model="settings.mainTable.sortOption" @change="settingsUpdated" :options="settings.mainTable.sortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
               </div>
-              <!-- <div class="mt-0 pr-1">
-                <font size="-2" v-b-popover.hover.top="'# txs'">{{ filteredSortedAddresses.length }}</font>
-              </div> -->
-              <!-- <div class="mt-0 pr-1">
-                <b-pagination size="sm" v-model="settings.mainTable.currentPage" @input="settingsUpdated" :total-rows="filteredSortedAddresses.length" :per-page="settings.mainTable.pageSize" style="height: 0;"></b-pagination>
-              </div> -->
+              <div class="mt-0 pr-1">
+                <font size="-2" v-b-popover.hover.top="'# txs'">{{ filteredSortedMainTable.length }}</font>
+              </div>
+              <div class="mt-0 pr-1">
+                <b-pagination size="sm" v-model="settings.mainTable.currentPage" @input="settingsUpdated" :total-rows="filteredSortedMainTable.length" :per-page="settings.mainTable.pageSize" style="height: 0;"></b-pagination>
+              </div>
               <div class="mt-0 pl-1">
                 <b-form-select size="sm" v-model="settings.mainTable.pageSize" @change="settingsUpdated" :options="pageSizes" v-b-popover.hover.top="'Addresses page size'"></b-form-select>
               </div>
@@ -778,13 +778,19 @@
           },
           filteredMainTable() {
             const results = [];
-
-            // results.push({ aaa: 123 });
-
+            for (const [owner, data] of Object.entries(this.mainToken.owners)) {
+              results.push({ owner, count: data.length });
+            }
             return results;
           },
           filteredSortedMainTable() {
-            return this.filteredMainTable;
+            let results = this.filteredMainTable;
+            if (this.settings.mainTable.sortOption == 'countasc') {
+              results.sort((a, b) => a.count - b.count);
+            } else if (this.settings.mainTable.sortOption == 'countdsc') {
+              results.sort((a, b) => b.count - a.count);
+            }
+            return results;
           },
           pagedFilteredSortedMainTable() {
             return this.filteredSortedMainTable.slice((this.settings.mainTable.currentPage - 1) * this.settings.mainTable.pageSize, this.settings.mainTable.currentPage * this.settings.mainTable.pageSize);
@@ -1547,12 +1553,12 @@
             const mainToken = await db0.cache.where("objectName").equals('mainToken').toArray();
             if (mainToken.length == 1) {
               this.mainToken = mainToken[0].object;
-              console.log("mounted - mainToken: " + JSON.stringify(this.mainToken, null, 2));
+              console.log("mounted - mainToken.owners: " + JSON.stringify(this.mainToken.owners, null, 2));
             }
             const ensMap = await db0.cache.where("objectName").equals('ensMap').toArray();
             if (ensMap.length == 1) {
               this.ensMap = ensMap[0].object;
-              console.log("mounted - ensMap: " + JSON.stringify(this.ensMap, null, 2));
+              // console.log("mounted - ensMap: " + JSON.stringify(this.ensMap, null, 2));
             }
             // const addresses = await db0.cache.where("objectName").equals('addresses').toArray();
             // if (addresses.length == 1) {
