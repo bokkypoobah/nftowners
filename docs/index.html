@@ -170,6 +170,14 @@
                   {{ parseInt(data.index) + ((settings.mainTable.currentPage - 1) * settings.mainTable.pageSize) + 1 }}
                 </b-form-checkbox>
               </template>
+              <template #cell(owner)="data">
+                {{ ensOrAddress(data.item.owner) }}
+              </template>
+              <template #cell(collections)="data">
+                <!-- {{ mainToken.collection.name + ' x ' + data.item.count }} -->
+                <b-avatar rounded :badge="data.item.count" variant="light" size="3.0rem" :src="mainToken.collection.image" v-b-popover.hover="mainToken.collection.name">
+                </b-avatar>
+              </template>
             </b-table>
 
             <b-table v-if="false" small fixed striped selectable responsive hover :fields="addressesFields" :items="pagedFilteredSortedAddresses" show-empty empty-html="Click [+] above to add addresses and Ethereum transaction hashes, and set your Etherscan API key for imports. Click on your address on the top right to add it" head-variant="light" class="m-0 mt-1">
