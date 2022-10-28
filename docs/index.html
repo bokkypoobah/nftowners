@@ -149,13 +149,14 @@
               <b-card-text>
                 <div class="d-flex flex-wrap m-1 p-0">
                   <div class="mt-0 pr-1">
-                    <b-form-input type="text" size="sm" v-model.trim="searchCollections.filter" @input="doSearchCollections" debounce="600" v-b-popover.hover.top="'Collection name filter'" placeholder="🔍 collection name" style="min-width: 12.0rem;"></b-form-input>
+                    <b-form-input type="text" size="sm" v-model.trim="searchCollections.filter" @input="doSearchCollections" debounce="600" v-b-popover.hover.top="'Collection name filter'" placeholder="🔍 collection name. Or <SPACE>, then <TAB>" style="min-width: 20.0rem;"></b-form-input>
                   </div>
                 </div>
                 <b-table small fixed striped responsive hover :fields="searchCollectionsFields" :items="searchCollections.results" show-empty empty-html="Enter name fragment in the top left input field" head-variant="light" class="m-0">
                   <template #cell(action)="data">
-                    <b-button v-if="!(data.item.contract in collections)" size="sm" @click="addCollection(data.item)" variant="primary">Add</b-button>
+                    <b-button v-if="!(data.item.contract in collections || data.item.tokenCount > 25000)" size="sm" @click="addCollection(data.item)" variant="primary">Add</b-button>
                     <b-button v-if="data.item.contract in collections" disabled size="sm" @click="addCollection(data.item)" variant="outline-primary">Added</b-button>
+                    <b-button v-if="data.item.tokenCount > 25000" disabled size="sm" @click="addCollection(data.item)" variant="outline-primary">Too Large</b-button>
                   </template>
                   <template #cell(collection)="data">
                     <div class="d-flex flex-row">
@@ -205,7 +206,7 @@
                   <div class="ml-2">
                     {{ data.item.name }}
                     <br />
-                    Volume: 1d {{ commify(data.item.volume["1day"]) + 'e' }}; 7d {{ commify(data.item.volume["7day"]) + 'e' }}; 30d {{ commify(data.item.volume["30day"]) + 'e' }}; allTime {{ commify(data.item.volume["allTime"]) + 'e' }}; tokens {{ Object.keys(data.item.tokens).length + '/' + data.item.tokenCount }};
+                    Volume: 1d {{ commify(data.item.volume["1day"]) + 'e' }}; 7d {{ commify(data.item.volume["7day"]) + 'e' }}; 30d {{ commify(data.item.volume["30day"]) + 'e' }}; allTime {{ commify(data.item.volume["allTime"]) + 'e' }}; tokens {{ Object.keys(data.item.tokens).length + '/' + data.item.tokenCount }}; owners {{ Object.keys(data.item.owners).length }}
                   </div>
                 </div>
               </template>
@@ -216,7 +217,7 @@
             <template #header>
               CrossTab
             </template>
-            <div class="d-flex flex-wrap m-0 mt-1 p-0">
+            <div class="d-flex flex-wrap m-0 mx-1 mt-1 p-0">
               <div class="mt-0 pr-1">
                 <b-form-input type="text" size="sm" v-model.trim="settings.crossTab.filter" @change="settingsUpdated" debounce="600" v-b-popover.hover.top="'TODO: Filter by address/ENS'" placeholder="address fragment" style="min-width: 12.0rem;"></b-form-input>
               </div>
@@ -526,7 +527,7 @@
             contracts.sort((a, b) => ('' + a.sort).localeCompare(b.sort))
             // const contracts = Object.values(this.collections).map(c => c.contract);
             console.log("crossTabFields - after: " + JSON.stringify(contracts));
-            const order = contracts.map(e => e.contract);
+            const order = contracts.map(e => e.contract).slice(0, 15);
             console.log("crossTabFields - order: " + JSON.stringify(order));
 
             // const order = [
@@ -561,7 +562,7 @@
             contracts.sort((a, b) => ('' + a.sort).localeCompare(b.sort))
             // const contracts = Object.values(this.collections).map(c => c.contract);
             console.log("filteredCrossTab - after: " + JSON.stringify(contracts));
-            const order = contracts.map(e => e.contract);
+            const order = contracts.map(e => e.contract).slice(0, 15);
             console.log("filteredCrossTab - order: " + JSON.stringify(order));
 
 
