@@ -75,7 +75,7 @@
                 <b-form-input type="text" size="sm" v-model.trim="settings.collections.filter" @change="settingsUpdated" debounce="600" v-b-popover.hover.top="'Collection name filter'" placeholder="🔍 collection" style="min-width: 12.0rem;"></b-form-input>
               </div>
               <div class="mt-0 pr-1">
-                <b-button size="sm" :disabled="sync.section != null" @click="processIt('syncCollections')" variant="primary" v-b-popover.hover.top="'Sync selected or all collections'">Sync</b-button>
+                <b-button size="sm" :disabled="sync.section != null || Object.keys(selectedCollections).length == 0" @click="processIt('syncCollections')" variant="primary" v-b-popover.hover.top="'Select collections to sync first'">Sync</b-button>
               </div>
               <div class="mt-0 flex-grow-1">
               </div>
@@ -189,6 +189,12 @@
                 <b-form-checkbox size="sm" :checked="selectedCollections[data.item.contract] ? 1 : 0" value="1" @change="toggleSelectedCollections([data.item])">
                   {{ parseInt(data.index) + ((settings.collections.currentPage - 1) * settings.collections.pageSize) + 1 }}
                 </b-form-checkbox>
+              </template>
+              <template #head(sort)="data">
+                <span v-b-popover.hover="'Enter alphanumeric sort key for inclusion into the Cross Tab below'">{{ data.label }}</span>
+              </template>
+              <template #cell(sort)="data">
+                <b-form-input type="text" size="sm" :value="data.item.sort" @change="collectionsSortUpdated(data.item.contract, $event)" debounce="600" style="max-width: 2.0rem;"></b-form-input>
               </template>
               <template #cell(collection)="data">
                 <div class="d-flex flex-row">
@@ -451,7 +457,8 @@
           ],
           collectionsFields: [
             { key: 'number', label: '#', sortable: false, thStyle: 'width: 5%;', tdClass: 'text-truncate' },
-            { key: 'collection', label: 'Collection', sortable: false, thStyle: 'width: 95%;', tdClass: 'text-truncate' },
+            { key: 'sort', label: 'Sort', sortable: false, thStyle: 'width: 5%;', tdClass: 'text-truncate' },
+            { key: 'collection', label: 'Collection', sortable: false, thStyle: 'width: 90%;', tdClass: 'text-truncate' },
           ],
           mainTableFields: [
             { key: 'number', label: '#', sortable: false, thStyle: 'width: 5%;', tdClass: 'text-truncate' },
@@ -485,6 +492,7 @@
                 tokens: item.tokens,
                 owners: item.owners,
                 updated: item.updated,
+                sort: item.sort,
               });
             }
             return results;
@@ -508,13 +516,26 @@
           // ],
 
           crossTabFields() {
-            const order = [
-              "0x31385d3520bced94f77aae104b406994d8f2168c",
-              "0xb47e3cd837ddf8e4c57f05d70ab865de6e193bbb",
-              "0x282bdd42f4eb70e7a9d9f40c8fea0825b7f68c5d",
-              "0xe8e2b12e02cefc12603e99cd414d9d9ec82068cf",
-              "0x2f46e37477ca4033d74986b15f0572e9913b4858",
-            ];
+            const contracts = [];
+            for (const [contract, collection] of Object.entries(this.collections)) {
+              if (collection.sort != null && collection.sort.length > 0) {
+                contracts.push({ contract, sort: collection.sort });
+              }
+            }
+            console.log("crossTabFields - before: " + JSON.stringify(contracts));
+            contracts.sort((a, b) => ('' + a.sort).localeCompare(b.sort))
+            // const contracts = Object.values(this.collections).map(c => c.contract);
+            console.log("crossTabFields - after: " + JSON.stringify(contracts));
+            const order = contracts.map(e => e.contract);
+            console.log("crossTabFields - order: " + JSON.stringify(order));
+
+            // const order = [
+            //   "0x31385d3520bced94f77aae104b406994d8f2168c",
+            //   "0xb47e3cd837ddf8e4c57f05d70ab865de6e193bbb",
+            //   "0x282bdd42f4eb70e7a9d9f40c8fea0825b7f68c5d",
+            //   "0xe8e2b12e02cefc12603e99cd414d9d9ec82068cf",
+            //   "0x2f46e37477ca4033d74986b15f0572e9913b4858",
+            // ];
             const results = [];
             results.push({ key: 'number', label: '#', thStyle: 'width: 5%;', tdClass: 'text-truncate' })
             results.push({ key: 'owner', label: 'Owner', thStyle: 'width: 30%;', tdClass: 'text-truncate' })
@@ -529,14 +550,29 @@
           },
 
           filteredCrossTab() {
-            const order = [
-              "0x31385d3520bced94f77aae104b406994d8f2168c",
-              "0xb47e3cd837ddf8e4c57f05d70ab865de6e193bbb",
-              "0x282bdd42f4eb70e7a9d9f40c8fea0825b7f68c5d",
-              "0xe8e2b12e02cefc12603e99cd414d9d9ec82068cf",
-              "0x2f46e37477ca4033d74986b15f0572e9913b4858",
-            ];
-            console.log("filteredCrossTab: " + JSON.stringify(order));
+
+            const contracts = [];
+            for (const [contract, collection] of Object.entries(this.collections)) {
+              if (collection.sort != null && collection.sort.length > 0) {
+                contracts.push({ contract, sort: collection.sort });
+              }
+            }
+            console.log("filteredCrossTab - before: " + JSON.stringify(contracts));
+            contracts.sort((a, b) => ('' + a.sort).localeCompare(b.sort))
+            // const contracts = Object.values(this.collections).map(c => c.contract);
+            console.log("filteredCrossTab - after: " + JSON.stringify(contracts));
+            const order = contracts.map(e => e.contract);
+            console.log("filteredCrossTab - order: " + JSON.stringify(order));
+
+
+            // const order = [
+            //   "0x31385d3520bced94f77aae104b406994d8f2168c",
+            //   "0xb47e3cd837ddf8e4c57f05d70ab865de6e193bbb",
+            //   "0x282bdd42f4eb70e7a9d9f40c8fea0825b7f68c5d",
+            //   "0xe8e2b12e02cefc12603e99cd414d9d9ec82068cf",
+            //   "0x2f46e37477ca4033d74986b15f0572e9913b4858",
+            // ];
+            // console.log("filteredCrossTab: " + JSON.stringify(order));
 
             const table = {};
             for (const contractIndex in order) {
@@ -688,7 +724,7 @@
             return address == null ? null : (length == 0 ? address : address.substring(0, length));
           },
           toggleSelectedCollections(items) {
-            console.log("toggleSelectedCollections: " + JSON.stringify(items));
+            // console.log("toggleSelectedCollections: " + JSON.stringify(items));
             let someFalse = false;
             let someTrue = false;
             for (const item of items) {
@@ -706,10 +742,10 @@
               }
             }
             localStorage.selectedCollections = JSON.stringify(this.selectedCollections);
-            console.log("selectedCollections: " + JSON.stringify(this.selectedCollections, null, 2));
+            // console.log("selectedCollections: " + JSON.stringify(this.selectedCollections, null, 2));
           },
           clearSelectedCollections() {
-            console.log("clearSelectedCollections");
+            // console.log("clearSelectedCollections");
             this.selectedCollections = {};
             localStorage.selectedCollections = JSON.stringify(this.selectedCollections);
           },
@@ -737,7 +773,7 @@
             localStorage.selectedMainTable = JSON.stringify(this.selectedMainTable);
           },
           settingsUpdated() {
-            console.log("settingsUpdated: " + JSON.stringify(this.settings, null, 2));
+            // console.log("settingsUpdated: " + JSON.stringify(this.settings, null, 2));
             localStorage.settings = JSON.stringify(this.settings);
           },
           async addressesUpdated() {
@@ -747,6 +783,17 @@
             const db0 = new Dexie(this.db.name);
             db0.version(this.db.version).stores(this.db.schemaDefinition);
             await db0.cache.put({ objectName: 'addresses', object: this.addresses }).then (function() {
+            }).catch(function(error) {
+              console.log("error: " + error);
+            });
+            db0.close();
+          },
+          async collectionsSortUpdated(contract, event) {
+            console.log("collectionsSortUpdated - contract: " + contract + ", event: " + JSON.stringify(event));
+            Vue.set(this.collections[contract], 'sort', event);
+            const db0 = new Dexie(this.db.name);
+            db0.version(this.db.version).stores(this.db.schemaDefinition);
+            await db0.cache.put({ objectName: 'collections', object: this.collections }).then (function() {
             }).catch(function(error) {
               console.log("error: " + error);
             });
@@ -791,7 +838,7 @@
             }
           },
           async addCollection(collection) {
-            console.log("addCollection: " + JSON.stringify(collection, null, 2));
+            // console.log("addCollection: " + JSON.stringify(collection, null, 2));
             Vue.set(this.collections, collection.contract, {
               name: collection.name,
               slug: collection.slug,
@@ -815,9 +862,9 @@
             db0.close();
           },
           async deleteCollections() {
-            console.log("deleteCollections");
+            // console.log("deleteCollections");
             for (const contract of Object.keys(this.selectedCollections)) {
-              console.log("Deleting: " + contract);
+              // console.log("Deleting: " + contract);
               Vue.delete(this.collections, contract);
             }
             this.selectedCollections = {};
@@ -831,7 +878,7 @@
             db0.close();
           },
           async doSearchCollections(filter) {
-            console.log("doSearchCollections - filter: " + JSON.stringify(filter));
+            // console.log("doSearchCollections - filter: " + JSON.stringify(filter));
             this.settingsUpdated();
             let continuation = null;
             const results = [];
@@ -852,11 +899,11 @@
                      return [];
                   });
                 continuation = data.continuation;
-                console.log(JSON.stringify(data, null, 2));
+                // console.log(JSON.stringify(data, null, 2));
                 if (data && data.collections) {
                   for (const collectionData of data.collections) {
-                    console.log(JSON.stringify(collectionData, null, 2));
-                    console.log(JSON.stringify(collectionData.tokenCount, null, 2));
+                    // console.log(JSON.stringify(collectionData, null, 2));
+                    // console.log(JSON.stringify(collectionData.tokenCount, null, 2));
                     // const collectionId = collectionData.id;
                     const contract = collectionData.id;
                     const name = collectionData.name;
