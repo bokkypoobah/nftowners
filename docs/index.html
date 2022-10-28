@@ -437,8 +437,8 @@
             { value: 'namedsc', text: '▼ Name' },
           ],
           mainTableSortOptions: [
-            { value: 'countasc', text: '▲ Token Count' },
-            { value: 'countdsc', text: '▼ Token Count' },
+            { value: 'countasc', text: '▲ Collection #1 Token Count' },
+            { value: 'countdsc', text: '▼ Collection #1 Token Count' },
           ],
           pageSizes: [
             { value: 5, text: '5' },
@@ -636,11 +636,49 @@
           },
           filteredSortedCrossTab() {
             let results = this.filteredCrossTab;
-            // if (this.settings.mainTable.sortOption == 'countasc') {
-            //   results.sort((a, b) => a.count - b.count);
-            // } else if (this.settings.mainTable.sortOption == 'countdsc') {
-            //   results.sort((a, b) => b.count - a.count);
-            // }
+            if (this.settings.crossTab.sortOption == 'countasc') {
+              results.sort((a, b) => {
+                if (a.c0 == b.c0) {
+                  if (a.c1 == b.c1) {
+                    if (a.c2 == b.c2) {
+                      const tokensA = a.c3 && a.c3.length || 0;
+                      const tokensB = b.c3 && b.c3.length || 0;
+                      return tokensA - tokensB;
+                    } else {
+                      const tokensA = a.c2 && a.c2.length || 0;
+                      const tokensB = b.c2 && b.c2.length || 0;
+                      return tokensA - tokensB;
+                    }
+                  } else {
+                    const tokensA = a.c1 && a.c1.length || 0;
+                    const tokensB = b.c1 && b.c1.length || 0;
+                    return tokensA - tokensB;
+                  }
+                } else {
+                  const tokensA = a.c0 && a.c0.length || 0;
+                  const tokensB = b.c0 && b.c0.length || 0;
+                  return tokensA - tokensB;
+                }
+              });
+            } else if (this.settings.crossTab.sortOption == 'countdsc') {
+              results.sort((a, b) => {
+                if (a.c0 == b.c0) {
+                  if (a.c1 == b.c1) {
+                    const tokensA = a.c2 && a.c2.length || 0;
+                    const tokensB = b.c2 && b.c2.length || 0;
+                    return tokensB - tokensA;
+                  } else {
+                    const tokensA = a.c1 && a.c1.length || 0;
+                    const tokensB = b.c1 && b.c1.length || 0;
+                    return tokensB - tokensA;
+                  }
+                } else {
+                  const tokensA = a.c0 && a.c0.length || 0;
+                  const tokensB = b.c0 && b.c0.length || 0;
+                  return tokensB - tokensA;
+                }
+              });
+            }
             return results;
           },
           pagedFilteredSortedCrossTab() {
