@@ -418,6 +418,14 @@
           collectionsSortOptions: [
             { value: 'nameasc', text: '▲ Name' },
             { value: 'namedsc', text: '▼ Name' },
+            { value: 'vol1dayasc', text: '▲ 1 Day Volume' },
+            { value: 'vol1daydsc', text: '▼ 1 Day Volume' },
+            { value: 'vol7dayasc', text: '▲ 7 Day Volume' },
+            { value: 'vol7daydsc', text: '▼ 7 Day Volume' },
+            { value: 'vol30dayasc', text: '▲ 30 Day Volume' },
+            { value: 'vol30daydsc', text: '▼ 30 Day Volume' },
+            { value: 'volallasc', text: '▲ All Time Volume' },
+            { value: 'volalldsc', text: '▼ All Time Volume' },
           ],
           mainTableSortOptions: [
             { value: 'countasc', text: '▲ Collection #1 Token Count' },
@@ -485,6 +493,54 @@
               results.sort((a, b) => ('' + a.name).localeCompare(b.name));
             } else if (this.settings.collections.sortOption == 'namedsc') {
               results.sort((a, b) => ('' + b.name).localeCompare(a.name));
+            } else if (this.settings.collections.sortOption == 'vol1dayasc') {
+              results.sort((a, b) => {
+                const volumeA = a.volume && a.volume["1day"] || 0;
+                const volumeB = b.volume && b.volume["1day"] || 0;
+                return volumeA - volumeB;
+              });
+            } else if (this.settings.collections.sortOption == 'vol1daydsc') {
+              results.sort((a, b) => {
+                const volumeA = a.volume && a.volume["1day"] || 0;
+                const volumeB = b.volume && b.volume["1day"] || 0;
+                return volumeB - volumeA;
+              });
+            } else if (this.settings.collections.sortOption == 'vol7dayasc') {
+              results.sort((a, b) => {
+                const volumeA = a.volume && a.volume["7day"] || 0;
+                const volumeB = b.volume && b.volume["7day"] || 0;
+                return volumeA - volumeB;
+              });
+            } else if (this.settings.collections.sortOption == 'vol7daydsc') {
+              results.sort((a, b) => {
+                const volumeA = a.volume && a.volume["7day"] || 0;
+                const volumeB = b.volume && b.volume["7day"] || 0;
+                return volumeB - volumeA;
+              });
+            } else if (this.settings.collections.sortOption == 'vol30dayasc') {
+              results.sort((a, b) => {
+                const volumeA = a.volume && a.volume["30day"] || 0;
+                const volumeB = b.volume && b.volume["30day"] || 0;
+                return volumeA - volumeB;
+              });
+            } else if (this.settings.collections.sortOption == 'vol30daydsc') {
+              results.sort((a, b) => {
+                const volumeA = a.volume && a.volume["30day"] || 0;
+                const volumeB = b.volume && b.volume["30day"] || 0;
+                return volumeB - volumeA;
+              });
+            } else if (this.settings.collections.sortOption == 'volallasc') {
+              results.sort((a, b) => {
+                const volumeA = a.volume && a.volume["allTime"] || 0;
+                const volumeB = b.volume && b.volume["allTime"] || 0;
+                return volumeA - volumeB;
+              });
+            } else if (this.settings.collections.sortOption == 'volalldsc') {
+              results.sort((a, b) => {
+                const volumeA = a.volume && a.volume["allTime"] || 0;
+                const volumeB = b.volume && b.volume["allTime"] || 0;
+                return volumeB - volumeA;
+              });
             }
             return results;
           },
